@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9c0d547a8511bc43a0ec9fe3a3f550d, type: 3}
+  m_Name: Piovere
+  m_EditorClassIdentifier: Assembly-CSharp::RegionData
+  ID: region_piovere
+  DisplayName: Piovere
+  Description: O reino de Piovere se encontra a Sudeste do continente de Fiore, cercado
+    por aguas, arquipelagos e ilhas, um reino que comanda o mar e adora a Deusa da
+    Agua
+  IsDangerous: 1
+  DangerLevel: 20
+  Cities:
+  - {fileID: 11400000, guid: ce053d0fd053444488a0fc9e684d614f, type: 2}
+  - {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+  - {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}

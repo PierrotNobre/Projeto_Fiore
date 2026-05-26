@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e32b8a9b0ecbeb342997d277fdc4fc92, type: 3}
+  m_Name: MainDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::GameDatabase
+  Races:
+  - {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
+  Regions:
+  - {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  Cities:
+  - {fileID: 11400000, guid: ce053d0fd053444488a0fc9e684d614f, type: 2}
+  - {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+  - {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  TravelEvents:
+  - {fileID: 11400000, guid: 55d2a4902215d594e83e13e6764bdb68, type: 2}
+  - {fileID: 11400000, guid: fd832b6529b6b9a47b372f14ce9b3daa, type: 2}
+  Quests:
+  - {fileID: 11400000, guid: 1416bc61c2b069648aa40ef406bbb947, type: 2}
+  Items:
+  - {fileID: 11400000, guid: 2f84a569260c046409800d702dc4b6c1, type: 2}
+  Factions:
+  - {fileID: 11400000, guid: 524c1c8f23fc85846bc7e323a29fff57, type: 2}
+  Dialogues:
+  - {fileID: 11400000, guid: 9ac21f705de329442b9d66bf6bb8197f, type: 2}
+  NPCs:
+  - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}

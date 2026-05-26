@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e596fe96cc6e664d98bade7de1dfb7c, type: 3}
+  m_Name: Guild Master
+  m_EditorClassIdentifier: Assembly-CSharp::NPCData
+  ID: npc_guild_master
+  DisplayName: Mestre dos Gatos Negros
+  Description: "A l\xEDder cansada, afiada e teimosamente esperan\xE7osa da guilda
+    dos Gatos Negros."
+  Race: {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
+  Faction: {fileID: 11400000, guid: 524c1c8f23fc85846bc7e323a29fff57, type: 2}
+  Role: 2
+  HomeCity: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  DefaultDialogue: {fileID: 11400000, guid: 9ac21f705de329442b9d66bf6bb8197f, type: 2}
+  AlwaysAvailable: 1
+  AvailableFromHour: 8
+  AvailableUntilHour: 20

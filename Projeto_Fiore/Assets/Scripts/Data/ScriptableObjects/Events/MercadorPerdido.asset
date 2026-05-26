@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10d45333c9690864e88ed105f4a2486f, type: 3}
+  m_Name: MercadorPerdido
+  m_EditorClassIdentifier: Assembly-CSharp::TravelEventData
+  ID: event_merchant
+  DisplayName: Merchant Encounter
+  Description: Econtrou um mercador
+  EventText: "Um mercador est\xE1 parado \xE0 beira da estrada, com uma roda quebrada
+    e duas mulas assustadas. Ele ergue a m\xE3o quando v\xEA sua aproxima\xE7\xE3o.\n"
+  TriggerChance: 100
+  AllowedRegion: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  Choices:
+  - ChoiceText: Ajude o mercador
+    Consequence:
+      Type: 1
+      Value: 50
+      Faction: {fileID: 0}
+  - ChoiceText: Ignorar e seguir a vida
+    Consequence:
+      Type: 0
+      Value: 0
+      Faction: {fileID: 0}
+  - ChoiceText: Cobrar pela Ajuda
+    Consequence:
+      Type: 1
+      Value: 100
+      Faction: {fileID: 0}
+  Requirements: []
+  SetFlag: merchant_helped

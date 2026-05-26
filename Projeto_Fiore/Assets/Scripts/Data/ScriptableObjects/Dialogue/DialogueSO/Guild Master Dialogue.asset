@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 206ec89237ec7414ba1d4c401fe345b3, type: 3}
+  m_Name: Guild Master Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  ID: dialogue_guild_master
+  DisplayName: Guild Master Dialogue
+  Description: 
+  StartNodeID: start
+  Nodes:
+  - NodeID: start
+    SpeakerText: "Bem-vindo aos Gatos Negros. N\xE3o estamos nos melhores dias, mas
+      ainda respiramos"
+    Choices:
+    - ChoiceText: Precisa de ajuda?
+      NextNodeID: offer_quest
+      Requirements: []
+      Consequences: []
+    - ChoiceText: "S\xF3 estou passando"
+      NextNodeID: Bye
+      Requirements: []
+      Consequences: []
+    EndsDialogue: 0
+  - NodeID: offer_quest
+    SpeakerText: "Talvez. Temos um pacote que precisa chegar a Ravenhold. \xC9 simples,
+      mas o caminho nunca \xE9."
+    Choices:
+    - ChoiceText: Aceito o trabalho.
+      NextNodeID: accepted
+      Requirements: []
+      Consequences:
+      - Type: 8
+        TargetID: quest_deliverpackage
+        Value: 0
+    EndsDialogue: 0
+  - NodeID: accepted
+    SpeakerText: "\xD3timo. E tente voltar inteiro. A papelada para aventureiros
+      mortos \xE9 insuport\xE1vel."
+    Choices: []
+    EndsDialogue: 1
+  - NodeID: Bye
+    SpeakerText: "Ent\xE3o n\xE3o bloqueie a porta. Ela j\xE1 range demais."
+    Choices: []
+    EndsDialogue: 1

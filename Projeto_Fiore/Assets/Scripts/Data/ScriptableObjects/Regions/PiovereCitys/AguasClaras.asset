@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4245fc92e1d5fbd4bb8705420e2984b8, type: 3}
+  m_Name: AguasClaras
+  m_EditorClassIdentifier: Assembly-CSharp::CityData
+  ID: city_aguasclaras
+  DisplayName: "\xC1guas Claras"
+  Description: "Aguas claras \xE9 uma pequena cidade proximo a fronteira entre Piovere
+    e Roccia"
+  Region: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  HasPort: 1
+  HasGuild: 0
+  Prosperity: 5
+  Security: 4
+  MapPosition: {x: 0, y: 0}
+  Connections:
+  - ConnectedCity: {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+    TravelHours: 2
