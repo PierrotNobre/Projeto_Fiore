@@ -2,10 +2,15 @@
 
 **Mundo de Fiore** é um RPG de fantasia medieval em desenvolvimento, focado em exploração, narrativa, evolução de personagem, gerenciamento de grupo, guilda de aventureiros e sistemas clássicos de RPG adaptados para uma experiência mobile.
 
+Meu foco destre projeto é o estudo de GameDesign, Criação/Estrutura de mundo e me aprofundar no funcionamento de IA, onde estou criando tudo ligado a documentação, funcionamento, mundo e narrativa, os codigos estão sendo gerados com e modificados com o Codex da OpenAI.
+
 O projeto está sendo desenvolvido inicialmente como um protótipo jogável, com foco em construir uma base sólida de sistemas para futuramente expandir o mundo, as cidades, os NPCs, as missões e o combate.
+
+
 ![CityHub](./ScreenShots/CityHub.png)
 ![Event](./ScreenShots/Event.png)
 ![Save](./ScreenShots/Salvar.png)
+![Menu](./ScreenShots/Menu.png)
 
 ---
 
