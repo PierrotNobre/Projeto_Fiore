@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
+  m_Name: GuildTestDelivery
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  ID: guild_test_delivery
+  DisplayName: Entrega da Guilda
+  Description: Uma missao simples para testar o quadro da Guilda dos Gatos Negros.
+  QuestCategory: 2
+  RequiredGuildLevel: 1
+  Objectives: []
+  Steps:
+  - StepID: talk_guild_master
+    Title: Fale com a Mestre da Guilda
+    Description: Converse com a responsavel pela Guilda dos Gatos Negros.
+    ObjectiveType: 0
+    TargetID: black_cats_guild_master
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: enter_shop
+    Title: Entre na loja de Ravenhold
+    Description: Va ate a loja de Ravenhold.
+    ObjectiveType: 2
+    TargetID: ravenhold_shop
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: talk_merchant
+    Title: Fale com o mercador
+    Description: Converse com o Mercador de Ravenhold.
+    ObjectiveType: 0
+    TargetID: ravenhold_merchant
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  Rewards:
+    Coins: 20
+    Items: []
+    GuildReputation: 10
+    StatRewards: []
+  GoldReward: 0
+  DeadlineDays: 0
+  ItemRewards: []
+  ReputationRewards: []

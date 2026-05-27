@@ -11,6 +11,16 @@ public class DialogueChoice
     public List<DialogueRequirement> Requirements =
         new();
 
+    public List<RequirementData> GenericRequirements =
+        new();
+
+    public bool HideIfRequirementsFail;
+
+    public string LockedText;
+
+    public List<DialogueActionData> Actions =
+        new();
+
     public List<DialogueConsequence> Consequences =
         new();
 }

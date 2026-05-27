@@ -17,5 +17,11 @@ MonoBehaviour:
   Description: Minerio de Ferro
   Type: 1
   MaxStack: 99
+  BuyPrice: 10
   SellValue: 10
+  CanSell: 1
+  CanGift: 1
+  GiftCategory: 5
+  EquipmentSlot: 0
+  StatModifiers: []
   FlavorText: 

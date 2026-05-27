@@ -26,6 +26,11 @@ public class TravelManager
         }
     }
 
+    public TravelSession CurrentTravel =>
+        SaveManager.Instance
+        .CurrentSave
+        .Travel;
+
     public void TravelTo(
         CityData destination
     )
@@ -33,8 +38,45 @@ public class TravelManager
         if (destination == null)
             return;
 
+        if (IsTraveling)
+        {
+            Debug.LogWarning(
+                "Cannot start a new travel while another travel is active."
+            );
+
+            return;
+        }
+
+        CityData origin =
+            CurrentCity;
+
+        if (origin == null)
+        {
+            Debug.LogWarning(
+                "Cannot start travel without a current city."
+            );
+
+            return;
+        }
+
+        if (!TryGetConnection(
+            origin,
+            destination,
+            out CityConnection connection))
+        {
+            Debug.LogWarning(
+                $"No travel route from {origin.DisplayName} " +
+                $"to {destination.DisplayName}."
+            );
+
+            return;
+        }
+
         int travelHours =
-            GetTravelTime(destination);
+            Mathf.Max(
+                1,
+                connection.TravelHours
+            );
 
         SaveManager.Instance
             .CurrentSave
@@ -42,16 +84,37 @@ public class TravelManager
             new TravelSession
             {
                 OriginCityID =
-                    CurrentCity.ID,
+                    origin.ID,
 
                 DestinationCityID =
                     destination.ID,
+
+                TotalHours =
+                    travelHours,
 
                 RemainingHours =
                     travelHours,
 
                 IsTraveling = true
             };
+
+        SaveManager.Instance
+            .CurrentSave
+            .Location
+            .IsTraveling =
+            true;
+
+        SaveManager.Instance
+            .SaveGame();
+
+        WorldStateManager
+            .Instance
+            ?.TriggerWorldEvents(
+                EventTriggerType.OnTravelStart,
+                origin,
+                origin,
+                destination
+            );
 
         GameManager.Instance
             .ChangeState(
@@ -73,7 +136,8 @@ public class TravelManager
         if (!IsTraveling)
             return;
 
-        if (TravelEventManager.Instance.HasActiveEvent)
+        if (TravelEventManager.Instance != null &&
+            TravelEventManager.Instance.HasActiveEvent)
         {
             Debug.Log(
                 "Cannot continue travel while an event is active."
@@ -83,9 +147,7 @@ public class TravelManager
         }
 
         var travel =
-            SaveManager.Instance
-            .CurrentSave
-            .Travel;
+            CurrentTravel;
 
         int tick =
             Mathf.Min(
@@ -105,11 +167,17 @@ public class TravelManager
             $"{travel.RemainingHours}"
         );
 
-        TravelEventManager.Instance.TryTriggerEvent();
-
         if (travel.RemainingHours <= 0)
         {
             ArriveAtDestination();
+            return;
+        }
+
+        if (TravelEventManager.Instance != null)
+        {
+            TravelEventManager
+                .Instance
+                .TryTriggerEvent();
         }
     }
 
@@ -123,9 +191,7 @@ public class TravelManager
     private void ArriveAtDestination()
     {
         var travel =
-            SaveManager.Instance
-            .CurrentSave
-            .Travel;
+            CurrentTravel;
 
         SaveManager.Instance
             .CurrentSave
@@ -142,10 +208,28 @@ public class TravelManager
         travel.IsTraveling =
             false;
 
+        travel.RemainingHours =
+            0;
+
         var city =
             DatabaseManager.Instance
             .GetData<CityData>(
                 travel.DestinationCityID
+            );
+
+        var originCity =
+            DatabaseManager.Instance
+            .GetData<CityData>(
+                travel.OriginCityID
+            );
+
+        WorldStateManager
+            .Instance
+            ?.TriggerWorldEvents(
+                EventTriggerType.OnTravelEnd,
+                city,
+                originCity,
+                city
             );
 
         GameManager.Instance.ChangeState(GameState.Cityhub);
@@ -156,29 +240,57 @@ public class TravelManager
 
         SaveManager.Instance.SaveGame();
 
-        Debug.Log(
-            $"Arrived at " +
-            $"{city.DisplayName}"
-        );
+        if (city != null)
+        {
+            Debug.Log(
+                $"Arrived at " +
+                $"{city.DisplayName}"
+            );
+        }
     }
 
-    private int GetTravelTime(
+    public bool TryGetConnection(
         CityData destination
     )
     {
-        foreach (var connection
-            in CurrentCity.Connections)
+        return TryGetConnection(
+            CurrentCity,
+            destination,
+            out _
+        );
+    }
+
+    public bool TryGetConnection(
+        CityData origin,
+        CityData destination,
+        out CityConnection matchingConnection)
+    {
+        matchingConnection = null;
+
+        if (origin == null ||
+            destination == null ||
+            origin.Connections == null)
         {
-            if (connection
-                .ConnectedCity
-                == destination)
+            return false;
+        }
+
+        foreach (var connection
+            in origin.Connections)
+        {
+            if (connection == null ||
+                connection.ConnectedCity == null)
             {
-                return connection
-                    .TravelHours;
+                continue;
+            }
+
+            if (connection.ConnectedCity == destination)
+            {
+                matchingConnection = connection;
+                return true;
             }
         }
 
-        return 12;
+        return false;
     }
 
     private void OnEnable()
@@ -197,10 +309,7 @@ public class TravelManager
             return;
 
         var travel =
-            SaveManager
-                .Instance
-                .CurrentSave
-                .Travel;
+            CurrentTravel;
 
         if (travel.RemainingHours <= 0)
         {

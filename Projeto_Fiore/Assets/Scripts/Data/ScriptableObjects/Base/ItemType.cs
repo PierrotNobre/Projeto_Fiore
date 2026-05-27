@@ -8,5 +8,7 @@ public enum ItemType
 
     Equipment,
 
-    Valuable
+    Valuable,
+
+    Misc
 }

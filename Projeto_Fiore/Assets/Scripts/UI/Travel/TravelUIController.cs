@@ -14,6 +14,12 @@ public class TravelUIController : MonoBehaviour
     [SerializeField]
     private TMP_Text currentCityText;
 
+    [SerializeField]
+    private TMP_Text dateText;
+
+    [SerializeField]
+    private TMP_Text feedbackText;
+
     [Header("Containers")]
     [SerializeField]
     private Transform destinationContainer;
@@ -26,6 +32,10 @@ public class TravelUIController : MonoBehaviour
     {
         cityPanel.SetActive(false);
         travelPanel.SetActive(true);
+
+        SetFeedback(
+            "Escolha um destino disponivel."
+        );
 
         Refresh();
     }
@@ -45,8 +55,34 @@ public class TravelUIController : MonoBehaviour
                 .Instance
                 .CurrentCity;
 
+        if (currentCity == null)
+        {
+            currentCityText.text =
+                "Cidade atual nao encontrada.";
+
+            return;
+        }
+
         currentCityText.text =
             $"Partindo de: {currentCity.DisplayName}";
+
+        if (dateText != null)
+        {
+            dateText.text =
+                TimeManager
+                    .Instance
+                    .GetFormattedDate();
+        }
+
+        if (currentCity.Connections == null ||
+            currentCity.Connections.Count == 0)
+        {
+            SetFeedback(
+                "Nenhum destino conectado a esta cidade."
+            );
+
+            return;
+        }
 
         foreach (var connection
             in currentCity.Connections)
@@ -61,7 +97,10 @@ public class TravelUIController : MonoBehaviour
                 connection.ConnectedCity;
 
             int travelHours =
-                connection.TravelHours;
+                Mathf.Max(
+                    1,
+                    connection.TravelHours
+                );
 
             UIButtonEntry entry =
                 Instantiate(
@@ -70,8 +109,11 @@ public class TravelUIController : MonoBehaviour
                 );
 
             string label =
-                $"{destination.DisplayName}\n" +
-                $"{travelHours}h • Segurança {destination.Security}/10";
+                BuildDestinationLabel(
+                    destination,
+                    connection,
+                    travelHours
+                );
 
             entry.Setup(
                 label,
@@ -87,11 +129,68 @@ public class TravelUIController : MonoBehaviour
             $"Selected destination: {destination.DisplayName}"
         );
 
-        travelPanel.SetActive(false);
+        SetFeedback(
+            $"Iniciando viagem para {destination.DisplayName}..."
+        );
 
         TravelManager
             .Instance
             .TravelTo(destination);
+
+        if (TravelManager.Instance.IsTraveling)
+        {
+            travelPanel.SetActive(false);
+        }
+    }
+
+    private string BuildDestinationLabel(
+        CityData destination,
+        CityConnection connection,
+        int travelHours)
+    {
+        string description =
+            !string.IsNullOrEmpty(
+                connection.RouteDescription)
+                ? connection.RouteDescription
+                : destination.Description;
+
+        if (string.IsNullOrEmpty(description))
+        {
+            description =
+                "Sem descricao.";
+        }
+
+        string label =
+            $"{destination.DisplayName}\n" +
+            $"{description}\n" +
+            $"Duracao: {travelHours}h";
+
+        if (connection.TravelCost > 0)
+        {
+            label +=
+                $" - Custo: {connection.TravelCost} ouro";
+        }
+
+        if (connection.RiskLevel > 0)
+        {
+            label +=
+                $" - Risco: {connection.RiskLevel}/10";
+        }
+
+        label +=
+            $"\nSeguranca local: {destination.Security}/10";
+
+        return label;
+    }
+
+    private void SetFeedback(
+        string message)
+    {
+        if (feedbackText == null)
+            return;
+
+        feedbackText.text =
+            message;
     }
 
     private void ClearContainer(
@@ -124,5 +223,17 @@ public class TravelUIController : MonoBehaviour
     {
         travelPanel.SetActive(false);
         cityPanel.SetActive(true);
+
+        CityData city =
+            CityManager
+                .Instance
+                .CurrentCity;
+
+        if (city != null)
+        {
+            SetFeedback(
+                $"Chegada em {city.DisplayName}."
+            );
+        }
     }
 }

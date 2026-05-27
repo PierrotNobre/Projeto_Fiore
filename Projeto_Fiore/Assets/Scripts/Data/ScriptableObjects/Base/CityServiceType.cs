@@ -1,16 +1,24 @@
 public enum CityServiceType
 {
-    None,
+    None = 0,
 
-    Tavern,
+    Tavern = 1,
 
-    Market,
+    Market = 2,
 
-    Guild,
+    Guild = 3,
 
-    Blacksmith,
+    Blacksmith = 4,
 
-    Temple,
+    Temple = 5,
 
-    Harbor
+    Harbor = 6,
+
+    Travel = 7,
+
+    Inn = 8,
+
+    Shop = 9,
+
+    QuestBoard = 10
 }

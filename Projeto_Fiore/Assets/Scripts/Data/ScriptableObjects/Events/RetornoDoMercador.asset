@@ -15,13 +15,16 @@ MonoBehaviour:
   ID: event_merchantreturn
   DisplayName: Retorno Do Mercador
   Description: o mercador voltou depois de algum tempo
+  EventText: 
   TriggerChance: 100
   AllowedRegion: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  IsUnique: 1
   Choices:
   - ChoiceText: Ajude Ele novamente
     Consequence:
       Type: 1
       Value: 50
+      Faction: {fileID: 0}
   Requirements:
   - RequiredFlag: merchant_helped
     RequiredValue: 1

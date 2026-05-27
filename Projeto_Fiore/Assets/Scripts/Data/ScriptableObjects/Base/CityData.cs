@@ -10,6 +10,8 @@ public class CityData : BaseData
     [Header("Region")]
     public RegionData Region;
 
+    public FioreKingdom Kingdom;
+
     [Header("Travel")]
     public bool HasPort;
 
@@ -24,8 +26,22 @@ public class CityData : BaseData
     [Header("Map")]
     public Vector2 MapPosition;
 
+    public Sprite Icon;
+
     public List<CityConnection> Connections;
 
     [Header("Services")]
     public List<CityServiceType> Services;
+
+    [Header("Shop")]
+    public ShopData Shop;
+
+    [Header("NPCs")]
+    public List<NPCData> NPCs;
+
+    [Header("Locations")]
+    public List<CityLocationData> Locations;
+
+    [Header("Exploration")]
+    public List<ExplorationAreaData> ExplorationAreas;
 }

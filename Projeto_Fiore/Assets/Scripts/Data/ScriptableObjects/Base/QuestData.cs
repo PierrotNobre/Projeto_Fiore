@@ -9,10 +9,20 @@ public class QuestData
     : BaseData
 {
     [Header("Quest")]
+    public QuestCategory QuestCategory =
+        QuestCategory.Side;
+
+    public int RequiredGuildLevel = 1;
+
     public List<QuestObjective>
         Objectives;
 
+    public List<QuestStepData> Steps =
+        new();
+
     [Header("Reward")]
+    public RewardData Rewards = new();
+
     public int GoldReward;
 
     [Header("Time Limit")]

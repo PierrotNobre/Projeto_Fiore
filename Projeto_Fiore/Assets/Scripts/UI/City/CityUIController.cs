@@ -54,7 +54,7 @@ public class CityUIController : MonoBehaviour
             .GetFormattedDate();
 
         goldText.text =
-            $"Ouro: {SaveManager.Instance.CurrentSave.Player.Gold}";
+            $"Moedas: {WalletManager.GetOrCreate().GetCoins()}";
     }
 
     private void BuildServices()
@@ -122,10 +122,40 @@ public class CityUIController : MonoBehaviour
 
         switch (service)
         {
+            case CityServiceType.Travel:
+                if (!MobileHUDManager.TryShowScreen(
+                    UIScreenType.Travel))
+                {
+                    OpenTravel();
+                }
+                break;
+
             case CityServiceType.Guild:
-                CityManager
-                    .Instance
-                    .OpenGuild();
+                if (!MobileHUDManager.TryShowScreen(
+                    UIScreenType.Guild))
+                {
+                    CityManager
+                        .Instance
+                        .OpenGuild();
+                }
+                break;
+
+            case CityServiceType.Inn:
+                if (!MobileHUDManager.TryShowScreen(
+                    UIScreenType.Inn))
+                {
+                    Rest();
+                }
+                break;
+
+            case CityServiceType.Shop:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.Shop);
+                break;
+
+            case CityServiceType.QuestBoard:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.QuestBoard);
                 break;
 
             case CityServiceType.Tavern:
@@ -171,14 +201,24 @@ public class CityUIController : MonoBehaviour
 
     public void OpenTravel()
     {
+        if (MobileHUDManager.TryShowScreen(
+            UIScreenType.Travel))
+        {
+            return;
+        }
+
         travelUIController.Open();
     }
 
     public void OpenInventory()
     {
-        Debug.Log(
-            "Inventory UI will open here."
-        );
+        if (!MobileHUDManager.TryShowScreen(
+            UIScreenType.Inventory))
+        {
+            Debug.Log(
+                "Inventory UI will open here."
+            );
+        }
     }
 
     private void ClearContainer(
@@ -202,6 +242,18 @@ public class CityUIController : MonoBehaviour
     {
         return service switch
         {
+            CityServiceType.Travel =>
+                "Viajar",
+
+            CityServiceType.Inn =>
+                "Estalagem",
+
+            CityServiceType.Shop =>
+                "Loja",
+
+            CityServiceType.QuestBoard =>
+                "Quadro de Missoes",
+
             CityServiceType.Tavern =>
                 "Taverna",
 
@@ -230,6 +282,12 @@ public class CityUIController : MonoBehaviour
         GameEvents.OnTimeAdvanced += Refresh;
 
         Refresh();
+
+        if (SaveManager.Instance != null &&
+            SaveManager.Instance.HasActiveGame)
+        {
+            MobileHUDManager.OpenOrCreate();
+        }
     }
 
     private void OnDisable()

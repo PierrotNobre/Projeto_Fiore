@@ -12,15 +12,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e596fe96cc6e664d98bade7de1dfb7c, type: 3}
   m_Name: Guild Master
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
-  ID: npc_guild_master
-  DisplayName: Mestre dos Gatos Negros
-  Description: "A l\xEDder cansada, afiada e teimosamente esperan\xE7osa da guilda
-    dos Gatos Negros."
+  ID: black_cats_guild_master
+  DisplayName: Mestre da Guilda
+  Description: A aventureira que salvou o protagonista e lidera a Guilda dos Gatos Negros.
   Race: {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
   Faction: {fileID: 11400000, guid: 524c1c8f23fc85846bc7e323a29fff57, type: 2}
   Role: 2
-  HomeCity: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  Portrait: {fileID: 0}
+  FullBodySprite: {fileID: 0}
+  IconSprite: {fileID: 0}
+  HomeCity: {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+  DefaultLocationID: ravenhold_black_cats_guild
+  AppearsInCityOverview: 0
   DefaultDialogue: {fileID: 11400000, guid: 9ac21f705de329442b9d66bf6bb8197f, type: 2}
   AlwaysAvailable: 1
   AvailableFromHour: 8
   AvailableUntilHour: 20
+  RelatedService: 3
+  AvailableServices:
+  - 0
+  - 3
+  - 2
+  ShopData: {fileID: 0}
+  IsImportantNPC: 1
+  AppearanceRequirements: []
+  CanGainFriendship: 1
+  CanRomance: 0
+  CanMarry: 0
+  MaxFriendshipLevel: 4
+  MaxRomanceLevel: 0
+  ScheduleEntries:
+  - TimeOfDay: 0
+    CityID: city_ravenhold
+    LocationID: ravenhold_black_cats_guild
+    IsAvailable: 1
+    Requirements: []
+  - TimeOfDay: 1
+    CityID: city_ravenhold
+    LocationID: ravenhold_black_cats_guild
+    IsAvailable: 1
+    Requirements: []
+  - TimeOfDay: 2
+    CityID: city_ravenhold
+    LocationID: ravenhold_black_cats_guild
+    IsAvailable: 1
+    Requirements: []
+  - TimeOfDay: 3
+    CityID: city_ravenhold
+    LocationID: ravenhold_black_cats_guild
+    IsAvailable: 0
+    Requirements: []
+  CanReceiveGifts: 1
+  ItemGiftPreferences:
+  - ItemID: bread
+    Reaction: 2
+    FriendshipAmount: 1
+    RomanceAmount: 0
+  CategoryGiftPreferences: []

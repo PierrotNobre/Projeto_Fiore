@@ -1,10 +1,12 @@
 public enum QuestStatus
 {
-    Available,
+    NotStarted = 0,
 
-    Active,
+    Available = 0,
 
-    Completed,
+    Active = 1,
 
-    Failed
+    Completed = 2,
+
+    Failed = 3
 }

@@ -13,41 +13,96 @@ MonoBehaviour:
   m_Name: Guild Master Dialogue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
   ID: dialogue_guild_master
-  DisplayName: Guild Master Dialogue
-  Description: 
+  DisplayName: Dialogue Guild Master
+  Description: Dialogo inicial da Mestre da Guilda.
   StartNodeID: start
   Nodes:
   - NodeID: start
-    SpeakerText: "Bem-vindo aos Gatos Negros. N\xE3o estamos nos melhores dias, mas
-      ainda respiramos"
+    SpeakerName: Mestre da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: A Guilda dos Gatos Negros ainda esta em decadencia, mas pode voltar a crescer.
+    NextNodeID: 
     Choices:
-    - ChoiceText: Precisa de ajuda?
-      NextNodeID: offer_quest
+    - ChoiceText: Abrir guilda.
+      NextNodeID: 
       Requirements: []
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions:
+      - ActionType: 13
+        TargetID: 
+        Amount: 0
+        Reward:
+          Coins: 0
+          Items: []
+          GuildReputation: 0
+          StatRewards: []
+        NotificationMessage: 
       Consequences: []
-    - ChoiceText: "S\xF3 estou passando"
-      NextNodeID: Bye
+    - ChoiceText: Concluir visita a guilda.
+      NextNodeID: 
       Requirements: []
+      GenericRequirements:
+      - Type: 1
+        StatType: 0
+        RequiredValue: 0
+        RequiredQuestID: meet_black_cats_guild
+        RequiredQuestStatus: 1
+        RequiredEventID: 
+        RequiredGuildLevel: 1
+        RequiredCoins: 0
+        RequiredItemID: 
+        RequiredItemQuantity: 1
+      HideIfRequirementsFail: 1
+      LockedText: 
+      Actions:
+      - ActionType: 2
+        TargetID: meet_black_cats_guild
+        Amount: 0
+        Reward:
+          Coins: 0
+          Items: []
+          GuildReputation: 0
+          StatRewards: []
+        NotificationMessage: 
+      Consequences: []
+    - ChoiceText: Falar sobre a guilda.
+      NextNodeID: guild_state
+      Requirements: []
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions: []
+      Consequences: []
+    - ChoiceText: Ate depois.
+      NextNodeID: bye
+      Requirements: []
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions: []
       Consequences: []
     EndsDialogue: 0
-  - NodeID: offer_quest
-    SpeakerText: "Talvez. Temos um pacote que precisa chegar a Ravenhold. \xC9 simples,
-      mas o caminho nunca \xE9."
+  - NodeID: guild_state
+    SpeakerName: Mestre da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: A guilda precisa de trabalho, reputacao e gente capaz. Se ajudar, ela pode se reerguer.
+    NextNodeID: 
     Choices:
-    - ChoiceText: Aceito o trabalho.
-      NextNodeID: accepted
+    - ChoiceText: Voltar.
+      NextNodeID: start
       Requirements: []
-      Consequences:
-      - Type: 8
-        TargetID: quest_deliverpackage
-        Value: 0
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions: []
+      Consequences: []
     EndsDialogue: 0
-  - NodeID: accepted
-    SpeakerText: "\xD3timo. E tente voltar inteiro. A papelada para aventureiros
-      mortos \xE9 insuport\xE1vel."
-    Choices: []
-    EndsDialogue: 1
-  - NodeID: Bye
-    SpeakerText: "Ent\xE3o n\xE3o bloqueie a porta. Ela j\xE1 range demais."
+  - NodeID: bye
+    SpeakerName: Mestre da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: Volte quando precisar da guilda.
+    NextNodeID: 
     Choices: []
     EndsDialogue: 1

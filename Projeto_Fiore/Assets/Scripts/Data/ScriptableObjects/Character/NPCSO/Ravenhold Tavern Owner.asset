@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e596fe96cc6e664d98bade7de1dfb7c, type: 3}
+  m_Name: Ravenhold Tavern Owner
+  m_EditorClassIdentifier: Assembly-CSharp::NPCData
+  ID: ravenhold_tavern_owner
+  DisplayName: Dona da Taverna
+  Description: Responsavel pelo atendimento da taverna.
+  Race: {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
+  Faction: {fileID: 0}
+  Role: 0
+  Portrait: {fileID: 0}
+  FullBodySprite: {fileID: 0}
+  IconSprite: {fileID: 0}
+  HomeCity: {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+  DefaultLocationID: ravenhold_tavern
+  AppearsInCityOverview: 0
+  DefaultDialogue: {fileID: 11400000, guid: 7149d767cdd04b09b37e8a706b10775a, type: 2}
+  AlwaysAvailable: 1
+  AvailableFromHour: 8
+  AvailableUntilHour: 20
+  RelatedService: 8
+  AvailableServices:
+  - 0
+  - 4
+  ShopData: {fileID: 0}
+  IsImportantNPC: 0
+  AppearanceRequirements: []
+  CanGainFriendship: 1
+  CanRomance: 0
+  CanMarry: 0
+  MaxFriendshipLevel: 4
+  MaxRomanceLevel: 0
+  ScheduleEntries:
+  - TimeOfDay: 0
+    CityID: city_ravenhold
+    LocationID: ravenhold_tavern
+    IsAvailable: 0
+    Requirements: []
+  - TimeOfDay: 1
+    CityID: city_ravenhold
+    LocationID: ravenhold_tavern
+    IsAvailable: 0
+    Requirements: []
+  - TimeOfDay: 2
+    CityID: city_ravenhold
+    LocationID: ravenhold_tavern
+    IsAvailable: 1
+    Requirements: []
+  - TimeOfDay: 3
+    CityID: city_ravenhold
+    LocationID: ravenhold_tavern
+    IsAvailable: 1
+    Requirements: []
+  CanReceiveGifts: 1
+  ItemGiftPreferences: []
+  CategoryGiftPreferences:
+  - Category: 0
+    Reaction: 3
+    FriendshipAmount: 4
+    RomanceAmount: 0

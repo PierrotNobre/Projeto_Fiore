@@ -19,6 +19,7 @@ MonoBehaviour:
     e duas mulas assustadas. Ele ergue a m\xE3o quando v\xEA sua aproxima\xE7\xE3o.\n"
   TriggerChance: 100
   AllowedRegion: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  IsUnique: 1
   Choices:
   - ChoiceText: Ajude o mercador
     Consequence:

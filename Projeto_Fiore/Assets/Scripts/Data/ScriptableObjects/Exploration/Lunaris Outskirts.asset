@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2da81da6391b421483dd9ed944e1aa02, type: 3}
+  m_Name: Lunaris Outskirts
+  m_EditorClassIdentifier: Assembly-CSharp::ExplorationAreaData
+  ID: lunaris_outskirts
+  DisplayName: Arredores de Lunaris
+  Description: Area de teste proxima a Lunaris.
+  AssociatedCity: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  KingdomName: Piovere
+  AreaSprite: {fileID: 0}
+  IsUnlockedByDefault: 1
+  RecommendedLevel: 1
+  TravelTimeCostInPeriods: 1
+  MaxStepsBeforeReturn: 6
+  UnlockRequirements: []
+  Nodes: []
+  PossibleEvents: []
+  Resources:
+  - ResourceNodeID: lunaris_rough_stone_node
+    DisplayName: Pedras Brutas
+    Description: Recurso simples encontrado nos arredores.
+    PossibleItems:
+    - ItemID: rough_stone
+      Quantity: 1
+    TimeCostInPeriods: 1
+    OncePerDay: 1
+    Requirements: []

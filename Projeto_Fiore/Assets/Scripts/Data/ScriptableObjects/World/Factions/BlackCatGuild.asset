@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BlackCatGuild
   m_EditorClassIdentifier: Assembly-CSharp::FactionData
   ID: faction_blackcatguild
-  DisplayName: Black Cat
+  DisplayName: Gatos Negros
   Description: Guilda dos gatos negros
   Type: 1
   MainRegion: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
   IsMajorFaction: 1
-  Ideology: Gosta de gatos
+  Ideology: Guilda de aventureiros em decadencia que o jogador ajudara a reerguer.

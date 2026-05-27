@@ -54,10 +54,9 @@ public class TravelProgressUIController : MonoBehaviour
             return;
 
         var travel =
-            SaveManager
+            TravelManager
                 .Instance
-                .CurrentSave
-                .Travel;
+                .CurrentTravel;
 
         CityData origin =
             DatabaseManager
@@ -73,11 +72,29 @@ public class TravelProgressUIController : MonoBehaviour
                     travel.DestinationCityID
                 );
 
+        if (origin == null ||
+            destination == null)
+        {
+            routeText.text =
+                "Rota de viagem nao encontrada.";
+
+            remainingTimeText.text =
+                $"Tempo restante: {travel.RemainingHours}h";
+
+            dateText.text =
+                TimeManager
+                    .Instance
+                    .GetFormattedDate();
+
+            return;
+        }
+
         routeText.text =
-            $"{origin.DisplayName} → {destination.DisplayName}";
+            $"{origin.DisplayName} -> {destination.DisplayName}";
 
         remainingTimeText.text =
-            $"Tempo restante: {travel.RemainingHours}h";
+            $"Tempo restante: {travel.RemainingHours}h " +
+            $"de {travel.TotalHours}h";
 
         dateText.text =
             TimeManager

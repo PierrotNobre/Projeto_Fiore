@@ -16,9 +16,28 @@ public class CityManager
 
     public void EnterCity()
     {
+        CityData city =
+            CurrentCity;
+
+        if (city == null)
+        {
+            Debug.LogWarning(
+                "Cannot enter city because current city was not found."
+            );
+
+            return;
+        }
+
         Debug.Log(
-            $"Entered city: {CurrentCity.DisplayName}"
+            $"Entered city: {city.DisplayName}"
         );
+
+        WorldStateManager
+            .Instance
+            ?.TriggerWorldEvents(
+                EventTriggerType.OnEnterCity,
+                city
+            );
 
         QuestManager
             .Instance
@@ -75,5 +94,11 @@ public class CityManager
         Debug.Log(
             "Guild Opened"
         );
+
+        if (!MobileHUDManager.TryShowScreen(
+            UIScreenType.Guild))
+        {
+            GuildUIController.OpenOrCreate();
+        }
     }
 }

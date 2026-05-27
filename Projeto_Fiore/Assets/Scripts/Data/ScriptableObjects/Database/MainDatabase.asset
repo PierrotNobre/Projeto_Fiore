@@ -20,16 +20,49 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ce053d0fd053444488a0fc9e684d614f, type: 2}
   - {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
   - {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  ExplorationAreas:
+  - {fileID: 11400000, guid: 109bba0796ad4f2d9fc8fd56860b3f55, type: 2}
+  - {fileID: 11400000, guid: ef889b3a4b8e438597b3f6ff8c810f5a, type: 2}
   TravelEvents:
   - {fileID: 11400000, guid: 55d2a4902215d594e83e13e6764bdb68, type: 2}
   - {fileID: 11400000, guid: fd832b6529b6b9a47b372f14ce9b3daa, type: 2}
+  WorldEvents:
+  - {fileID: 11400000, guid: 556c012b86b1407086f158e3b73e277e, type: 2}
+  - {fileID: 11400000, guid: 7c48803e18c8437fab7476b728e86cb5, type: 2}
+  RelationshipEvents:
+  - {fileID: 11400000, guid: 5b66b712b7884f0dbf2dfaebe4329a46, type: 2}
+  CalendarEvents:
+  - {fileID: 11400000, guid: b12e5f2d6c0d4dbfa7ea2f1bf2efad01, type: 2}
+  ExplorationEvents:
+  - {fileID: 11400000, guid: 46ca43b9051f469889b2d9dce0ef1579, type: 2}
   Quests:
   - {fileID: 11400000, guid: 1416bc61c2b069648aa40ef406bbb947, type: 2}
+  - {fileID: 11400000, guid: a0951f128c4b4030942fc791c3a47fb3, type: 2}
+  - {fileID: 11400000, guid: e723c18fb523452fb786de009f266fe3, type: 2}
+  - {fileID: 11400000, guid: f35867e0c9f244b3b5144315bce003d7, type: 2}
+  - {fileID: 11400000, guid: d404e7c2fb284ce1b3cfe7dfd690a534, type: 2}
+  GuildTasks:
+  - {fileID: 11400000, guid: e1ce7c6d53034bfe9a3fca1f1a4a2771, type: 2}
+  Enemies:
+  - {fileID: 11400000, guid: 99a09084e78546afae8d750ed84f4d39, type: 2}
   Items:
   - {fileID: 11400000, guid: 2f84a569260c046409800d702dc4b6c1, type: 2}
+  - {fileID: 11400000, guid: dd1a0d9dc9c640009dc6062bad209d31, type: 2}
+  - {fileID: 11400000, guid: 9bf93aba627c4b94804f9cc8a896913f, type: 2}
+  - {fileID: 11400000, guid: 72ab016e493a429da9ef7fbe120f1fd9, type: 2}
+  - {fileID: 11400000, guid: bba30103c3da4c70902a25cff3615ffb, type: 2}
+  - {fileID: 11400000, guid: 767f3b289c24487b959a847d91c8f21c, type: 2}
   Factions:
   - {fileID: 11400000, guid: 524c1c8f23fc85846bc7e323a29fff57, type: 2}
   Dialogues:
   - {fileID: 11400000, guid: 9ac21f705de329442b9d66bf6bb8197f, type: 2}
+  - {fileID: 11400000, guid: 0f41a32b4ce8475a860cea363ee07251, type: 2}
+  - {fileID: 11400000, guid: cbd0b677ccb84e87a02740c0ae798bf1, type: 2}
+  - {fileID: 11400000, guid: 44a9a1fd3f514c1096a674c8c9e697f2, type: 2}
+  - {fileID: 11400000, guid: 7149d767cdd04b09b37e8a706b10775a, type: 2}
   NPCs:
   - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
+  - {fileID: 11400000, guid: f1a6b2452f2244d1be10b2857f1225ef, type: 2}
+  - {fileID: 11400000, guid: d24c9b85e43a4065ba98c48435981114, type: 2}
+  - {fileID: 11400000, guid: 00512e50cd424625aa99a2af94cf5fbb, type: 2}
+  - {fileID: 11400000, guid: 789df2f12fe24581998ae32b86bc5f2c, type: 2}

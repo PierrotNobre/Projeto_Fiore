@@ -14,8 +14,11 @@ public static class GameEvents
     public static Action<int> OnDayPassed;
     public static Action<int> OnMonthPassed;
     public static Action<int> OnYearPassed;
+    public static Action<FioreSeason> OnSeasonChanged;
+    public static Action<TimeOfDay> OnTimeOfDayChanged;
     public static Action OnTimeAdvanced;
 
     public static Action<TravelEventData> OnTravelEventTriggered;
     public static Action OnTravelEventResolved;
+    public static Action<WorldEventData> OnWorldEventTriggered;
 }

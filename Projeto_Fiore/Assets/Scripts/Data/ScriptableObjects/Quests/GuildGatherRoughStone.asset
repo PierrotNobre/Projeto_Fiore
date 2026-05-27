@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
+  m_Name: GuildGatherRoughStone
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  ID: guild_gather_rough_stone
+  DisplayName: Coleta para a Guilda
+  Description: Contrato simples de exploracao para a Guilda dos Gatos Negros.
+  QuestCategory: 2
+  RequiredGuildLevel: 1
+  Objectives: []
+  Steps:
+  - StepID: enter_ravenhold_outskirts
+    Title: Explore os arredores de Ravenhold
+    Description: Va ate os arredores de Ravenhold.
+    ObjectiveType: 9
+    TargetID: ravenhold_outskirts
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: collect_rough_stone
+    Title: Colete uma Pedra Bruta
+    Description: Encontre Pedra Bruta durante a exploracao.
+    ObjectiveType: 3
+    TargetID: rough_stone
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: report_to_guild_master
+    Title: Entregue o resultado
+    Description: Fale com a Mestre da Guilda.
+    ObjectiveType: 0
+    TargetID: black_cats_guild_master
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  Rewards:
+    Coins: 20
+    Items: []
+    GuildReputation: 10
+    StatRewards: []
+  GoldReward: 0
+  DeadlineDays: 0
+  ItemRewards: []
+  ReputationRewards: []

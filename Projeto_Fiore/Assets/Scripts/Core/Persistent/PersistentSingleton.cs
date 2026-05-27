@@ -17,4 +17,12 @@ public abstract class PersistentSingleton<T> : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
+
+    protected virtual void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 }

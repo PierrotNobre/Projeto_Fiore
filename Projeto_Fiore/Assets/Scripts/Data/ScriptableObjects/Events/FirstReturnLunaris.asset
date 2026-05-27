@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0450771a124e4a8c8a8ae70b6bb0aebd, type: 3}
+  m_Name: FirstReturnLunaris
+  m_EditorClassIdentifier: Assembly-CSharp::WorldEventData
+  ID: travel_ravenhold_lunaris_first_return
+  DisplayName: Primeiro retorno a Lunaris
+  Description: Evento unico de teste ao entrar em Lunaris depois de uma viagem.
+  IsUnique: 1
+  TriggerType: 1
+  City: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+  OriginCity: {fileID: 0}
+  DestinationCity: {fileID: 0}
+  RequiresSeason: 0
+  RequiredSeason: 0
+  RequiredWorldFlag: 
+  RequiredWorldFlagValue: 1
+  RequiredQuestID: return_to_lunaris
+  RequiredQuestStatus: 1
+  Actions:
+  - Type: 6
+    QuestID: 
+    Value: 0
+    Message: Voce retornou para Lunaris.
+  - Type: 2
+    QuestID: return_to_lunaris
+    Value: 0
+    Message: 

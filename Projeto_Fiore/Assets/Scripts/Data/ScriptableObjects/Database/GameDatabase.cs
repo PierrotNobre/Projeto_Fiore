@@ -15,11 +15,26 @@ public class GameDatabase
 
     public List<CityData> Cities;
 
+    public List<ExplorationAreaData> ExplorationAreas;
+
     [Header("Events")]
     public List<TravelEventData> TravelEvents;
 
+    public List<WorldEventData> WorldEvents;
+
+    public List<NPCRelationshipEventData> RelationshipEvents;
+
+    public List<CalendarEventData> CalendarEvents;
+
+    public List<ExplorationEventData> ExplorationEvents;
+
     [Header("Quests")]
     public List<QuestData> Quests;
+
+    [Header("Guild")]
+    public List<GuildTaskData> GuildTasks;
+
+    public List<EnemyData> Enemies;
 
     [Header("Items")]
     public List<ItemData> Items;

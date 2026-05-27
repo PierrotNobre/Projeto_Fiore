@@ -24,37 +24,67 @@ public class CharacterManager
     public int GetStat(
         StatType type)
     {
+        return GetTotalStat(type);
+    }
+
+    public int GetBaseStat(
+        StatType type)
+    {
+        return Stats.GetStat(type);
+    }
+
+    public int GetBonusStat(
+        StatType type)
+    {
+        return GetRaceBonus(type) +
+            EquipmentManager
+                .GetOrCreate()
+                .GetTotalStatBonus(type);
+    }
+
+    public int GetTotalStat(
+        StatType type)
+    {
+        return GetBaseStat(type) +
+            GetBonusStat(type);
+    }
+
+    public bool MeetsRequirement(
+        StatType type,
+        int requiredValue)
+    {
+        return GetTotalStat(type) >=
+            requiredValue;
+    }
+
+    private int GetRaceBonus(
+        StatType type)
+    {
+        RaceData race =
+            PlayerRace;
+
+        if (race == null)
+            return 0;
+
         return type switch
         {
             StatType.Strength =>
-                Stats.Strength +
-                PlayerRace
-                .StrengthBonus,
+                race.StrengthBonus,
 
             StatType.Dexterity =>
-                Stats.Dexterity +
-                PlayerRace
-                .DexterityBonus,
+                race.DexterityBonus,
 
             StatType.Intelligence =>
-                Stats.Intelligence +
-                PlayerRace
-                .IntelligenceBonus,
+                race.IntelligenceBonus,
 
             StatType.Faith =>
-                Stats.Faith +
-                PlayerRace
-                .FaithBonus,
+                race.FaithBonus,
 
             StatType.Vitality =>
-                Stats.Vitality +
-                PlayerRace
-                .VitalityBonus,
+                race.VitalityBonus,
 
             StatType.Charisma =>
-                Stats.Charisma +
-                PlayerRace
-                .CharismaBonus,
+                race.CharismaBonus,
 
             _ => 0
         };
@@ -69,6 +99,21 @@ public class CharacterManager
         GetStat(
             StatType.Dexterity
         ) * 15;
+
+    public void RestoreVitals()
+    {
+        Stats.CurrentHP =
+            MaxHP;
+
+        Stats.CurrentStamina =
+            MaxStamina;
+
+        SaveManager.Instance.SaveGame();
+
+        GameFeedbackUI.ShowNotification(
+            "Vida e energia recuperadas."
+        );
+    }
 
     public void GainExperience(
         int amount)

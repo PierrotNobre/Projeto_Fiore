@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee654ec80142bab41ba3ce8f6b076ccf, type: 3}
+  m_Name: Rough Stone
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  ID: rough_stone
+  DisplayName: Pedra Bruta
+  Description: Um material simples para testes.
+  Type: 1
+  MaxStack: 99
+  BuyPrice: 3
+  SellValue: 1
+  CanSell: 1
+  CanGift: 1
+  GiftCategory: 5
+  EquipmentSlot: 0
+  StatModifiers: []
+  FlavorText: 

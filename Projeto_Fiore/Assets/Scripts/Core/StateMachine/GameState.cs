@@ -8,6 +8,8 @@ public enum GameState
 
     Travel,
 
+    Exploration,
+
     Event,
 
     Cityhub,

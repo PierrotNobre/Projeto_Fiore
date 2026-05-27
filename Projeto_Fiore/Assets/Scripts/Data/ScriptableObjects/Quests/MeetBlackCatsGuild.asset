@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
+  m_Name: MeetBlackCatsGuild
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  ID: meet_black_cats_guild
+  DisplayName: Conheca a Guilda dos Gatos Negros
+  Description: Visite a Guilda dos Gatos Negros em Ravenhold.
+  Objectives:
+  - Type: 2
+    TargetID: guild_black_cats_opened
+    RequiredAmount: 1
+  Steps:
+  - StepID: enter_ravenhold
+    Title: Chegue a Ravenhold
+    Description: Viaje ate Ravenhold para procurar a Guilda dos Gatos Negros.
+    ObjectiveType: 1
+    TargetID: city_ravenhold
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: enter_black_cats_guild
+    Title: Entre na Guilda dos Gatos Negros
+    Description: Encontre a sede da guilda em Ravenhold.
+    ObjectiveType: 2
+    TargetID: ravenhold_black_cats_guild
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: talk_to_guild_master
+    Title: Fale com a Mestre da Guilda
+    Description: Converse com a responsavel pela Guilda dos Gatos Negros.
+    ObjectiveType: 0
+    TargetID: black_cats_guild_master
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  Rewards:
+    Coins: 0
+    Items:
+    - ItemID: potion_simple
+      Quantity: 1
+    GuildReputation: 10
+    StatRewards: []
+  GoldReward: 0
+  DeadlineDays: 0
+  ItemRewards: []
+  ReputationRewards: []

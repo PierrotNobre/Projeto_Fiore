@@ -16,5 +16,13 @@ public enum DialogueConsequenceType
 
     AdvanceTime,
 
-    StartQuest
+    StartQuest,
+
+    CompleteQuest,
+
+    FailQuest,
+
+    ShowNotification,
+
+    MarkEventOccurred
 }

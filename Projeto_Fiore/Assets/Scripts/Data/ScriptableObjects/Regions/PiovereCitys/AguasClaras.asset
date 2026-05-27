@@ -17,11 +17,16 @@ MonoBehaviour:
   Description: "Aguas claras \xE9 uma pequena cidade proximo a fronteira entre Piovere
     e Roccia"
   Region: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  Kingdom: 3
   HasPort: 1
   HasGuild: 0
   Prosperity: 5
   Security: 4
   MapPosition: {x: 0, y: 0}
+  Icon: {fileID: 0}
   Connections:
   - ConnectedCity: {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+    RouteDescription: Rota curta ate Ravenhold.
     TravelHours: 2
+    TravelCost: 0
+    RiskLevel: 0

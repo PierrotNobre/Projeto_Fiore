@@ -13,17 +13,82 @@ MonoBehaviour:
   m_Name: RavenHold
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   ID: city_ravenhold
-  DisplayName: Raven Hold
-  Description: Uma cidade
+  DisplayName: Ravenhold
+  Description: Cidade conectada a Lunaris pelas rotas iniciais de viagem.
   Region: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  Kingdom: 3
   HasPort: 1
-  HasGuild: 0
+  HasGuild: 1
   Prosperity: 7
   Security: 8
   MapPosition: {x: 0, y: 0}
+  Icon: {fileID: 0}
   Connections:
   - ConnectedCity: {fileID: 11400000, guid: ce053d0fd053444488a0fc9e684d614f, type: 2}
+    RouteDescription: Rota curta ate Aguas Claras.
     TravelHours: 2
+    TravelCost: 0
+    RiskLevel: 0
   - ConnectedCity: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
+    RouteDescription: Rota direta entre Ravenhold e Lunaris.
     TravelHours: 16
-  Services: 00000000010000000200000005000000
+    TravelCost: 0
+    RiskLevel: 0
+  Services: 070000000300000008000000090000000a000000
+  Shop: {fileID: 11400000, guid: f8849b42c09b49448414e6f4a9690002, type: 2}
+  NPCs:
+  - {fileID: 11400000, guid: f1a6b2452f2244d1be10b2857f1225ef, type: 2}
+  - {fileID: 11400000, guid: d24c9b85e43a4065ba98c48435981114, type: 2}
+  - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
+  - {fileID: 11400000, guid: 789df2f12fe24581998ae32b86bc5f2c, type: 2}
+  Locations:
+  - LocationID: ravenhold_black_cats_guild
+    DisplayName: Guilda dos Gatos Negros
+    Description: Uma guilda em decadencia que o jogador ajudara a reconstruir.
+    LocationType: 1
+    LocationSprite: {fileID: 0}
+    NPCs:
+    - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
+    NPCIDs: []
+    Services: 030000000a000000
+    ShopData: {fileID: 0}
+    ShowInCityScreen: 1
+    UnlockRequirements: []
+  - LocationID: ravenhold_shop
+    DisplayName: Loja de Ravenhold
+    Description: Local para comprar e vender itens.
+    LocationType: 2
+    LocationSprite: {fileID: 0}
+    NPCs:
+    - {fileID: 11400000, guid: f1a6b2452f2244d1be10b2857f1225ef, type: 2}
+    NPCIDs: []
+    Services: 09000000
+    ShopData: {fileID: 11400000, guid: f8849b42c09b49448414e6f4a9690002, type: 2}
+    ShowInCityScreen: 1
+    UnlockRequirements: []
+  - LocationID: ravenhold_quest_board
+    DisplayName: Mural de Missoes
+    Description: Ponto de consulta para tarefas disponiveis.
+    LocationType: 5
+    LocationSprite: {fileID: 0}
+    NPCs:
+    - {fileID: 11400000, guid: d24c9b85e43a4065ba98c48435981114, type: 2}
+    NPCIDs: []
+    Services: 0a000000
+    ShopData: {fileID: 0}
+    ShowInCityScreen: 1
+    UnlockRequirements: []
+  - LocationID: ravenhold_tavern
+    DisplayName: Taverna de Ravenhold
+    Description: Local simples para descanso e conversas.
+    LocationType: 3
+    LocationSprite: {fileID: 0}
+    NPCs:
+    - {fileID: 11400000, guid: 789df2f12fe24581998ae32b86bc5f2c, type: 2}
+    NPCIDs: []
+    Services: 08000000
+    ShopData: {fileID: 0}
+    ShowInCityScreen: 1
+    UnlockRequirements: []
+  ExplorationAreas:
+  - {fileID: 11400000, guid: 109bba0796ad4f2d9fc8fd56860b3f55, type: 2}

@@ -25,4 +25,75 @@ public class PlayerStatsData
     public int CurrentHP = 100;
 
     public int CurrentStamina = 100;
+
+    public int GetStat(
+        StatType type)
+    {
+        return type switch
+        {
+            StatType.Strength => Strength,
+
+            StatType.Dexterity => Dexterity,
+
+            StatType.Intelligence => Intelligence,
+
+            StatType.Faith => Faith,
+
+            StatType.Vitality => Vitality,
+
+            StatType.Charisma => Charisma,
+
+            _ => 0
+        };
+    }
+
+    public void SetStat(
+        StatType type,
+        int value)
+    {
+        switch (type)
+        {
+            case StatType.Strength:
+                Strength = value;
+                break;
+
+            case StatType.Dexterity:
+                Dexterity = value;
+                break;
+
+            case StatType.Intelligence:
+                Intelligence = value;
+                break;
+
+            case StatType.Faith:
+                Faith = value;
+                break;
+
+            case StatType.Vitality:
+                Vitality = value;
+                break;
+
+            case StatType.Charisma:
+                Charisma = value;
+                break;
+        }
+    }
+
+    public void AddStat(
+        StatType type,
+        int amount)
+    {
+        SetStat(
+            type,
+            GetStat(type) + amount
+        );
+    }
+
+    public bool MeetsRequirement(
+        StatType type,
+        int requiredValue)
+    {
+        return GetStat(type)
+            >= requiredValue;
+    }
 }

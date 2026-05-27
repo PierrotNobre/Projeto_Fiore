@@ -26,9 +26,23 @@ public class DatabaseManager
 
         AddCollection(database.Cities);
 
+        AddCollection(database.ExplorationAreas);
+
         AddCollection(database.TravelEvents);
 
+        AddCollection(database.WorldEvents);
+
+        AddCollection(database.RelationshipEvents);
+
+        AddCollection(database.CalendarEvents);
+
+        AddCollection(database.ExplorationEvents);
+
         AddCollection(database.Quests);
+
+        AddCollection(database.GuildTasks);
+
+        AddCollection(database.Enemies);
 
         AddCollection(database.Items);
 
@@ -47,6 +61,9 @@ public class DatabaseManager
         List<T> collection
     ) where T : BaseData
     {
+        if (collection == null)
+            return;
+
         foreach (var item in collection)
         {
             if (item == null)
@@ -103,5 +120,29 @@ public class DatabaseManager
         }
 
         return result;
+    }
+
+    public ItemData GetItemById(
+        string itemId)
+    {
+        return GetData<ItemData>(itemId);
+    }
+
+    public bool HasItem(
+        string itemId)
+    {
+        return GetItemById(itemId) != null;
+    }
+
+    public NPCData GetNPCById(
+        string npcId)
+    {
+        return GetData<NPCData>(npcId);
+    }
+
+    public bool HasNPC(
+        string npcId)
+    {
+        return GetNPCById(npcId) != null;
     }
 }

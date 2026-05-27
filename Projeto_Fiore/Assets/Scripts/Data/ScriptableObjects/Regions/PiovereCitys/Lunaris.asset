@@ -14,14 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   ID: city_lunaris
   DisplayName: Lunaris
-  Description: Uma outra cidade ai
+  Description: Cidade conectada a Ravenhold pelas rotas iniciais de viagem.
   Region: {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
+  Kingdom: 3
   HasPort: 0
-  HasGuild: 1
+  HasGuild: 0
   Prosperity: 10
   Security: 10
   MapPosition: {x: 0, y: 0}
+  Icon: {fileID: 0}
   Connections:
   - ConnectedCity: {fileID: 11400000, guid: 3bcaaeb04cbc6bc429457841ba5c56cb, type: 2}
+    RouteDescription: Rota direta entre Lunaris e Ravenhold.
     TravelHours: 16
-  Services: 030000000100000002000000
+    TravelCost: 0
+    RiskLevel: 0
+  Services: 070000000800000009000000
+  Shop: {fileID: 0}
+  NPCs:
+  - {fileID: 11400000, guid: 00512e50cd424625aa99a2af94cf5fbb, type: 2}
+  Locations:
+  - LocationID: lunaris_plaza
+    DisplayName: Praca de Lunaris
+    Description: Area publica inicial de Lunaris.
+    LocationType: 0
+    LocationSprite: {fileID: 0}
+    NPCs:
+    - {fileID: 11400000, guid: 00512e50cd424625aa99a2af94cf5fbb, type: 2}
+    NPCIDs: []
+    Services: 07000000
+    ShopData: {fileID: 0}
+    ShowInCityScreen: 1
+    UnlockRequirements: []
+  ExplorationAreas:
+  - {fileID: 11400000, guid: ef889b3a4b8e438597b3f6ff8c810f5a, type: 2}

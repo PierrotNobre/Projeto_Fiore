@@ -7,8 +7,14 @@ public class DialogueNode
 {
     public string NodeID;
 
+    public string SpeakerName;
+
+    public Sprite Portrait;
+
     [TextArea]
     public string SpeakerText;
+
+    public string NextNodeID;
 
     public List<DialogueChoice> Choices =
         new();

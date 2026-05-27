@@ -18,11 +18,16 @@ public class TravelEventData
 
     public RegionData AllowedRegion;
 
+    public bool IsUnique;
+
     [Header("Choices")]
     public List<EventChoice> Choices;
 
     [Header("Requirements")]
     public List<EventRequirement> Requirements;
+
+    public List<RequirementData> GenericRequirements =
+        new();
 
     [Header("Rewards")] 
     public string SetFlag;

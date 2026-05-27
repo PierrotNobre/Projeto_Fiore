@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
+  m_Name: ReturnToLunaris
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  ID: return_to_lunaris
+  DisplayName: Retorne para Lunaris
+  Description: Volte para Lunaris depois de conhecer a Guilda dos Gatos Negros.
+  Objectives:
+  - Type: 0
+    TargetID: city_lunaris
+    RequiredAmount: 1
+  Steps:
+  - StepID: enter_lunaris
+    Title: Retorne para Lunaris
+    Description: Viaje de Ravenhold para Lunaris.
+    ObjectiveType: 1
+    TargetID: city_lunaris
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  Rewards:
+    Coins: 25
+    Items: []
+    GuildReputation: 0
+    StatRewards: []
+  GoldReward: 0
+  DeadlineDays: 0
+  ItemRewards: []
+  ReputationRewards: []

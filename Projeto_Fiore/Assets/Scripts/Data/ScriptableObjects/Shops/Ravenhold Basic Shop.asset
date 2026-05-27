@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38b77bbae586463882659cd7fc6aa00d, type: 3}
+  m_Name: Ravenhold Basic Shop
+  m_EditorClassIdentifier: Assembly-CSharp::ShopData
+  ShopID: shop_ravenhold_basic
+  DisplayName: Loja de Ravenhold
+  Items:
+  - ItemID: potion_simple
+    Price: 15
+    QuantityPerPurchase: 1
+  - ItemID: bread
+    Price: 5
+    QuantityPerPurchase: 1
+  - ItemID: simple_sword
+    Price: 60
+    QuantityPerPurchase: 1
+  - ItemID: simple_cloak
+    Price: 45
+    QuantityPerPurchase: 1

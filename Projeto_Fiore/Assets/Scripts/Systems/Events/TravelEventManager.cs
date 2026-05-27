@@ -13,6 +13,11 @@ public class TravelEventManager
     public bool HasActiveEvent =>
         CurrentEvent != null;
 
+    public void ClearActiveEvent()
+    {
+        CurrentEvent = null;
+    }
+
     public void TryTriggerEvent()
     {
         if (HasActiveEvent)
@@ -35,23 +40,42 @@ public class TravelEventManager
             if (data.AllowedRegion != currentRegion)
                 continue;
 
+            if (!RequirementChecker
+                .AreRequirementsMet(
+                    data.GenericRequirements
+                ))
+            {
+                continue;
+            }
+
+            if (WorldStateManager.Instance != null &&
+                !WorldStateManager
+                    .Instance
+                    .CanTriggerEvent(data))
+            {
+                continue;
+            }
+
             bool valid = true;
 
-            foreach (var requirement
-                in data.Requirements)
+            if (data.Requirements != null)
             {
-                bool hasFlag =
-                    WorldStateManager
-                        .Instance
-                        .HasFlag(
-                            requirement.RequiredFlag
-                        );
-
-                if (hasFlag
-                    != requirement.RequiredValue)
+                foreach (var requirement
+                    in data.Requirements)
                 {
-                    valid = false;
-                    break;
+                    bool hasFlag =
+                        WorldStateManager
+                            .Instance
+                            .HasFlag(
+                                requirement.RequiredFlag
+                            );
+
+                    if (hasFlag
+                        != requirement.RequiredValue)
+                    {
+                        valid = false;
+                        break;
+                    }
                 }
             }
 
@@ -87,8 +111,12 @@ public class TravelEventManager
         CurrentEvent = data;
 
         Debug.Log(
-            $"Travel Event Triggered: {data.DisplayName}"
+            $"Event triggered: {data.ID}"
         );
+
+        WorldStateManager
+            .Instance
+            ?.MarkEventOccurred(data.ID);
 
         GameEvents
             .OnTravelEventTriggered
@@ -113,6 +141,18 @@ public class TravelEventManager
 
         EventChoice choice =
             CurrentEvent.Choices[choiceIndex];
+
+        if (!RequirementChecker
+            .AreRequirementsMet(
+                choice.GenericRequirements
+            ))
+        {
+            GameFeedbackUI.ShowNotification(
+                "Requisito nao cumprido."
+            );
+
+            return;
+        }
 
         ResolveChoice(choice);
 
@@ -141,6 +181,36 @@ public class TravelEventManager
             ?.Invoke();
     }
 
+    public void ResolveCurrentEventWithoutChoice()
+    {
+        if (CurrentEvent == null)
+            return;
+
+        if (!string.IsNullOrEmpty(
+            CurrentEvent.SetFlag))
+        {
+            WorldStateManager
+                .Instance
+                .SetFlag(
+                    CurrentEvent.SetFlag
+                );
+        }
+
+        Debug.Log(
+            $"Event resolved without choice: {CurrentEvent.ID}"
+        );
+
+        CurrentEvent = null;
+
+        SaveManager
+            .Instance
+            .SaveGame();
+
+        GameEvents
+            .OnTravelEventResolved
+            ?.Invoke();
+    }
+
     private void ResolveChoice(
         EventChoice choice)
     {
@@ -151,30 +221,20 @@ public class TravelEventManager
 
             case ConsequenceType.GainGold:
 
-                SaveManager
-                    .Instance
-                    .CurrentSave
-                    .Player
-                    .Gold +=
-                    choice.Consequence.Value;
+                WalletManager
+                    .GetOrCreate()
+                    .AddCoins(
+                        choice.Consequence.Value
+                    );
 
                 break;
 
             case ConsequenceType.LoseGold:
 
-                SaveManager
-                    .Instance
-                    .CurrentSave
-                    .Player
-                    .Gold =
-                    Mathf.Max(
-                        0,
-                        SaveManager
-                            .Instance
-                            .CurrentSave
-                            .Player
-                            .Gold
-                        - choice.Consequence.Value
+                WalletManager
+                    .GetOrCreate()
+                    .SpendCoins(
+                        choice.Consequence.Value
                     );
 
                 break;

@@ -9,8 +9,37 @@ public class DialogueManager
 
     private DialogueNode currentNode;
 
-    public void StartDialogue(string dialogueID)
+    private NPCData currentNPC;
+
+    public DialogueData CurrentDialogue =>
+        currentDialogue;
+
+    public DialogueNode CurrentNode =>
+        currentNode;
+
+    public NPCData CurrentNPC =>
+        currentNPC;
+
+    public bool IsDialogueActive =>
+        currentDialogue != null &&
+        currentNode != null;
+
+    public void StartDialogue(
+        string dialogueID)
     {
+        StartDialogue(
+            dialogueID,
+            null
+        );
+    }
+
+    public void StartDialogue(
+        string dialogueID,
+        NPCData npc)
+    {
+        currentNPC =
+            npc;
+
         currentDialogue =
             DatabaseManager
                 .Instance
@@ -31,6 +60,33 @@ public class DialogueManager
             GetNode(
                 currentDialogue.StartNodeID
             );
+
+        if (currentNPC != null)
+        {
+            RelationshipManager
+                .GetOrCreate()
+                .IncrementTalkCount(
+                    currentNPC.ID
+                );
+
+            RelationshipManager
+                .GetOrCreate()
+                .AddFriendship(
+                    currentNPC.ID,
+                    1
+                );
+
+            QuestManager
+                .Instance
+                ?.ReportObjectiveProgress(
+                    new QuestObjectiveContext(
+                        QuestStepObjectiveType.TalkToNPC,
+                        currentNPC.ID,
+                        1,
+                        currentDialogue.ID
+                    )
+                );
+        }
 
         GameManager.Instance
             .ChangeState(
@@ -61,14 +117,8 @@ public class DialogueManager
             $"NPC: {currentNode.SpeakerText}"
         );
 
-        if (currentNode.EndsDialogue)
-        {
-            EndDialogue();
-            return;
-        }
-
         List<DialogueChoice> availableChoices =
-            GetAvailableChoices();
+            GetVisibleChoices();
 
         for (int i = 0;
             i < availableChoices.Count;
@@ -101,8 +151,32 @@ public class DialogueManager
         DialogueChoice choice =
             availableChoices[index];
 
+        SelectChoice(choice);
+    }
+
+    public void SelectChoice(
+        DialogueChoice choice)
+    {
+        if (choice == null ||
+            !ChoiceMeetsRequirements(choice))
+        {
+            GameFeedbackUI.ShowNotification(
+                "Requisito nao cumprido."
+            );
+
+            return;
+        }
+
+        Debug.Log(
+            $"Dialogue choice selected: {choice.ChoiceText}"
+        );
+
         ApplyConsequences(
             choice.Consequences
+        );
+
+        ApplyActions(
+            choice.Actions
         );
 
         if (string.IsNullOrEmpty(
@@ -118,8 +192,14 @@ public class DialogueManager
         DisplayCurrentNode();
     }
 
-    private List<DialogueChoice> GetAvailableChoices()
+    public List<DialogueChoice> GetAvailableChoices()
     {
+        if (currentNode == null ||
+            currentNode.Choices == null)
+        {
+            return new List<DialogueChoice>();
+        }
+
         return currentNode
             .Choices
             .Where(
@@ -128,9 +208,28 @@ public class DialogueManager
             .ToList();
     }
 
-    private bool ChoiceMeetsRequirements(
+    public List<DialogueChoice> GetVisibleChoices()
+    {
+        if (currentNode == null ||
+            currentNode.Choices == null)
+        {
+            return new List<DialogueChoice>();
+        }
+
+        return currentNode
+            .Choices
+            .Where(choice =>
+                ChoiceMeetsRequirements(choice) ||
+                !choice.HideIfRequirementsFail)
+            .ToList();
+    }
+
+    public bool ChoiceMeetsRequirements(
         DialogueChoice choice)
     {
+        if (choice == null)
+            return false;
+
         foreach (var requirement
             in choice.Requirements)
         {
@@ -141,7 +240,31 @@ public class DialogueManager
             }
         }
 
-        return true;
+        return RequirementChecker
+            .AreRequirementsMet(
+                choice.GenericRequirements,
+                currentNPC != null
+                    ? currentNPC.ID
+                    : null
+            );
+    }
+
+    public void ContinueDialogue()
+    {
+        if (currentNode == null)
+            return;
+
+        if (!string.IsNullOrEmpty(
+            currentNode.NextNodeID))
+        {
+            currentNode =
+                GetNode(currentNode.NextNodeID);
+
+            DisplayCurrentNode();
+            return;
+        }
+
+        EndDialogue();
     }
 
     private bool MeetsRequirement(
@@ -190,11 +313,9 @@ public class DialogueManager
                     );
 
             case DialogueRequirementType.MinimumGold:
-                return SaveManager
-                    .Instance
-                    .CurrentSave
-                    .Player
-                    .Gold >= requirement.Value;
+                return WalletManager
+                    .GetOrCreate()
+                    .CanAfford(requirement.Value);
         }
 
         return false;
@@ -259,16 +380,15 @@ public class DialogueManager
                 break;
 
             case DialogueConsequenceType.AddGold:
-                SaveManager
-                    .Instance
-                    .CurrentSave
-                    .Player
-                    .Gold += consequence.Value;
+                WalletManager
+                    .GetOrCreate()
+                    .AddCoins(consequence.Value);
                 break;
 
             case DialogueConsequenceType.RemoveGold:
-                SaveManager.Instance.CurrentSave.Player.Gold =
-                     Mathf.Max(0,SaveManager.Instance.CurrentSave.Player.Gold - consequence.Value);
+                WalletManager
+                    .GetOrCreate()
+                    .SpendCoins(consequence.Value);
                 break;
 
             case DialogueConsequenceType.AdvanceTime:
@@ -296,14 +416,241 @@ public class DialogueManager
                         );
                 }
                 break;
+
+            case DialogueConsequenceType.CompleteQuest:
+                QuestManager
+                    .Instance
+                    .CompleteQuest(
+                        consequence.TargetID
+                    );
+                break;
+
+            case DialogueConsequenceType.FailQuest:
+                QuestManager
+                    .Instance
+                    .FailQuest(
+                        consequence.TargetID
+                    );
+                break;
+
+            case DialogueConsequenceType.ShowNotification:
+                GameFeedbackUI.ShowNotification(
+                    consequence.TargetID
+                );
+                break;
+
+            case DialogueConsequenceType.MarkEventOccurred:
+                WorldStateManager
+                    .Instance
+                    .MarkEventOccurred(
+                        consequence.TargetID
+                    );
+                break;
         }
     }
 
-    private void EndDialogue()
+    public void ApplyActions(
+        List<DialogueActionData> actions)
+    {
+        if (actions == null)
+            return;
+
+        foreach (DialogueActionData action
+            in actions)
+        {
+            ApplyAction(action);
+        }
+    }
+
+    private void ApplyAction(
+        DialogueActionData action)
+    {
+        if (action == null)
+            return;
+
+        switch (action.ActionType)
+        {
+            case DialogueActionType.None:
+                break;
+
+            case DialogueActionType.StartQuest:
+                QuestManager
+                    .Instance
+                    .StartQuest(action.TargetID);
+                break;
+
+            case DialogueActionType.CompleteQuest:
+                QuestManager
+                    .Instance
+                    .CompleteQuest(action.TargetID);
+                break;
+
+            case DialogueActionType.FailQuest:
+                QuestManager
+                    .Instance
+                    .FailQuest(action.TargetID);
+                break;
+
+            case DialogueActionType.GiveReward:
+                RewardManager.ApplyReward(
+                    action.Reward,
+                    action.TargetID
+                );
+                break;
+
+            case DialogueActionType.AddItem:
+                InventoryManager
+                    .Instance
+                    .AddItem(
+                        action.TargetID,
+                        Mathf.Max(1, action.Amount)
+                    );
+                break;
+
+            case DialogueActionType.RemoveItem:
+                InventoryManager
+                    .Instance
+                    .RemoveItem(
+                        action.TargetID,
+                        Mathf.Max(1, action.Amount)
+                    );
+                break;
+
+            case DialogueActionType.AddCoins:
+                WalletManager
+                    .GetOrCreate()
+                    .AddCoins(action.Amount);
+                break;
+
+            case DialogueActionType.SpendCoins:
+                WalletManager
+                    .GetOrCreate()
+                    .SpendCoins(action.Amount);
+                break;
+
+            case DialogueActionType.AddGuildReputation:
+                GuildManager
+                    .Instance
+                    .AddReputation(action.Amount);
+                break;
+
+            case DialogueActionType.MarkEventOccurred:
+                WorldStateManager
+                    .Instance
+                    .MarkEventOccurred(action.TargetID);
+                break;
+
+            case DialogueActionType.OpenShop:
+                MobileHUDManager.OpenShopFromNPC(currentNPC);
+                break;
+
+            case DialogueActionType.OpenQuestBoard:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.QuestBoard
+                );
+                break;
+
+            case DialogueActionType.OpenGuild:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.Guild
+                );
+                break;
+
+            case DialogueActionType.OpenInn:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.Inn
+                );
+                break;
+
+            case DialogueActionType.OpenTravel:
+                MobileHUDManager.TryShowScreen(
+                    UIScreenType.Travel
+                );
+                break;
+
+            case DialogueActionType.AddNPCFriendship:
+                RelationshipManager
+                    .GetOrCreate()
+                    .AddFriendship(
+                        ResolveActionNPCID(action),
+                        action.Amount
+                    );
+                break;
+
+            case DialogueActionType.AddNPCRomance:
+                RelationshipManager
+                    .GetOrCreate()
+                    .AddRomance(
+                        ResolveActionNPCID(action),
+                        action.Amount
+                    );
+                break;
+
+            case DialogueActionType.SetNPCDating:
+                RelationshipManager
+                    .GetOrCreate()
+                    .SetDating(
+                        ResolveActionNPCID(action),
+                        action.BoolValue
+                    );
+                break;
+
+            case DialogueActionType.SetNPCMarried:
+                RelationshipManager
+                    .GetOrCreate()
+                    .SetMarried(
+                        ResolveActionNPCID(action),
+                        action.BoolValue
+                    );
+                break;
+
+            case DialogueActionType.IncrementNPCTalkCount:
+                RelationshipManager
+                    .GetOrCreate()
+                    .IncrementTalkCount(
+                        ResolveActionNPCID(action)
+                    );
+                break;
+
+            case DialogueActionType.TriggerRelationshipEvent:
+                RelationshipManager
+                    .GetOrCreate()
+                    .CheckRelationshipEventsForNPC(
+                        ResolveActionNPCID(action)
+                    );
+                break;
+
+            case DialogueActionType.ShowNotification:
+                GameFeedbackUI.ShowNotification(
+                    !string.IsNullOrEmpty(action.NotificationMessage)
+                        ? action.NotificationMessage
+                        : action.TargetID
+                );
+                break;
+        }
+    }
+
+    private string ResolveActionNPCID(
+        DialogueActionData action)
+    {
+        if (action != null &&
+            !string.IsNullOrEmpty(action.TargetID))
+        {
+            return action.TargetID;
+        }
+
+        return currentNPC != null
+            ? currentNPC.ID
+            : null;
+    }
+
+    public void EndDialogue()
     {
         currentDialogue = null;
 
         currentNode = null;
+
+        currentNPC = null;
 
         GameManager.Instance
             .ChangeState(
