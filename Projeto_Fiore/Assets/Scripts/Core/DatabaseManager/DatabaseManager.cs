@@ -22,6 +22,8 @@ public class DatabaseManager
     {
         AddCollection(database.Races);
 
+        AddCollection(database.StartingArchetypes);
+
         AddCollection(database.Regions);
 
         AddCollection(database.Cities);
@@ -43,6 +45,10 @@ public class DatabaseManager
         AddCollection(database.GuildTasks);
 
         AddCollection(database.Enemies);
+
+        AddCollection(database.CombatEncounters);
+
+        AddCollection(database.Skills);
 
         AddCollection(database.Items);
 

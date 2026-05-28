@@ -52,6 +52,8 @@ public class SaveData
             Player = new PlayerData();
         }
 
+        Player.EnsureRuntimeDefaults();
+
         if (Wallet == null)
         {
             Wallet = new WalletState();
@@ -121,6 +123,8 @@ public class SaveData
         {
             Equipment = new EquipmentState();
         }
+
+        Equipment.EnsureRuntimeDefaults();
 
         if (Stats == null)
         {

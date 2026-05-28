@@ -21,6 +21,17 @@ public class CharacterManager
             .RaceID
         );
 
+    private StartingArchetypeData PlayerArchetype =>
+        DatabaseManager
+        .Instance
+        .GetData<StartingArchetypeData>(
+            SaveManager
+            .Instance
+            .CurrentSave
+            .Player
+            .ArchetypeID
+        );
+
     public int GetStat(
         StatType type)
     {
@@ -37,6 +48,7 @@ public class CharacterManager
         StatType type)
     {
         return GetRaceBonus(type) +
+            GetArchetypeBonus(type) +
             EquipmentManager
                 .GetOrCreate()
                 .GetTotalStatBonus(type);
@@ -66,39 +78,139 @@ public class CharacterManager
         if (race == null)
             return 0;
 
-        return type switch
-        {
-            StatType.Strength =>
-                race.StrengthBonus,
+        return race.GetStatBonus(type);
+    }
 
-            StatType.Dexterity =>
-                race.DexterityBonus,
+    private int GetArchetypeBonus(
+        StatType type)
+    {
+        StartingArchetypeData archetype =
+            PlayerArchetype;
 
-            StatType.Intelligence =>
-                race.IntelligenceBonus,
+        if (archetype == null)
+            return 0;
 
-            StatType.Faith =>
-                race.FaithBonus,
-
-            StatType.Vitality =>
-                race.VitalityBonus,
-
-            StatType.Charisma =>
-                race.CharismaBonus,
-
-            _ => 0
-        };
+        return archetype.GetStatBonus(type);
     }
 
     public int MaxHP =>
+        100 +
         GetStat(
             StatType.Vitality
-        ) * 20;
+        ) * 5;
 
     public int MaxStamina =>
+        50 +
         GetStat(
-            StatType.Dexterity
-        ) * 15;
+            StatType.Intelligence
+        ) * 3;
+
+    public ElementType PrimaryElement =>
+        SaveManager
+            .Instance
+            .CurrentSave
+            .Player
+            .Elements
+            .PrimaryElement;
+
+    public int GetElementPowerBonus(
+        ElementType elementType)
+    {
+        CharacterElementData elements =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player
+                .Elements;
+
+        elements.EnsureRuntimeDefaults();
+
+        return elements.GetPowerBonus(elementType) +
+            EquipmentManager
+                .GetOrCreate()
+                .GetTotalElementPowerBonus(elementType);
+    }
+
+    public int GetElementResistance(
+        ElementType elementType)
+    {
+        CharacterElementData elements =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player
+                .Elements;
+
+        elements.EnsureRuntimeDefaults();
+
+        return elements.GetResistance(elementType) +
+            EquipmentManager
+                .GetOrCreate()
+                .GetTotalElementResistanceBonus(elementType);
+    }
+
+    public void ClampVitalsToCurrentMaximum()
+    {
+        Stats.CurrentHP =
+            Mathf.Clamp(
+                Stats.CurrentHP,
+                0,
+                MaxHP
+            );
+
+        Stats.CurrentStamina =
+            Mathf.Clamp(
+                Stats.CurrentStamina,
+                0,
+                MaxStamina
+            );
+    }
+
+    public void TakeDamage(
+        int amount)
+    {
+        Stats.CurrentHP =
+            Mathf.Max(
+                0,
+                Stats.CurrentHP -
+                Mathf.Max(0, amount)
+            );
+    }
+
+    public void RecoverHealth(
+        int amount)
+    {
+        Stats.CurrentHP =
+            Mathf.Clamp(
+                Stats.CurrentHP +
+                Mathf.Max(0, amount),
+                0,
+                MaxHP
+            );
+    }
+
+    public void SpendEnergy(
+        int amount)
+    {
+        Stats.CurrentStamina =
+            Mathf.Max(
+                0,
+                Stats.CurrentStamina -
+                Mathf.Max(0, amount)
+            );
+    }
+
+    public void RecoverEnergy(
+        int amount)
+    {
+        Stats.CurrentStamina =
+            Mathf.Clamp(
+                Stats.CurrentStamina +
+                Mathf.Max(0, amount),
+                0,
+                MaxStamina
+            );
+    }
 
     public void RestoreVitals()
     {

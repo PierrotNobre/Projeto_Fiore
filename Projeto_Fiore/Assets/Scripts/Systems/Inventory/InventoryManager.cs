@@ -7,7 +7,8 @@ public class InventoryManager
 {
     public void AddItem(
         string itemID,
-        int quantity = 1)
+        int quantity = 1,
+        bool reportQuestProgress = true)
     {
         if (string.IsNullOrEmpty(itemID) ||
             quantity <= 0)
@@ -51,21 +52,26 @@ public class InventoryManager
             $"Item added: {itemID} x{quantity}"
         );
 
-        QuestManager
-            .Instance
-            ?.ReportObjectiveProgress(
-                new QuestObjectiveContext(
-                    QuestStepObjectiveType.CollectItem,
-                    itemID,
-                    quantity,
-                    "Inventory"
-                )
-            );
+        if (reportQuestProgress)
+        {
+            QuestManager
+                .Instance
+                ?.ReportObjectiveProgress(
+                    new QuestObjectiveContext(
+                        QuestStepObjectiveType.CollectItem,
+                        itemID,
+                        quantity,
+                        "Inventory"
+                    )
+                );
+        }
     }
 
     public bool RemoveItem(
         string itemID,
-        int quantity = 1)
+        int quantity = 1,
+        bool syncEquipment = true,
+        bool saveAfterChange = true)
     {
         var inventory =
             SaveManager.Instance
@@ -96,13 +102,19 @@ public class InventoryManager
                 existing
             );
 
-            EquipmentManager
-                .GetOrCreate()
-                .UnequipItem(itemID);
+            if (syncEquipment)
+            {
+                EquipmentManager
+                    .GetOrCreate()
+                    .UnequipItem(itemID);
+            }
         }
 
-        SaveManager.Instance
-            .SaveGame();
+        if (saveAfterChange)
+        {
+            SaveManager.Instance
+                .SaveGame();
+        }
 
         return true;
     }
@@ -196,6 +208,12 @@ public class InventoryManager
             !string.IsNullOrEmpty(itemData.DisplayName)
                 ? itemData.DisplayName
                 : itemID;
+
+        CharacterManager
+            .Instance
+            ?.RecoverHealth(
+                Mathf.Max(1, itemData.EffectValue)
+            );
 
         Debug.Log(
             $"Item used: {itemID}"

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -28,9 +30,14 @@ public class MainMenuManager
     private RectTransform contentRoot;
     private TMP_InputField characterNameInput;
     private TMP_Text bodyPresetText;
+    private TMP_Text raceText;
+    private TMP_Text archetypeText;
+    private TMP_Text characterPreviewText;
 
     private int pendingSlotID = 1;
     private int selectedBodyPresetIndex;
+    private int selectedRaceIndex;
+    private int selectedArchetypeIndex;
     private bool loadOpenedFromGame;
 
     protected override void Awake()
@@ -333,6 +340,12 @@ public class MainMenuManager
         selectedBodyPresetIndex =
             0;
 
+        selectedRaceIndex =
+            0;
+
+        selectedArchetypeIndex =
+            0;
+
         ClearContent();
 
         AddTitle("Criar Personagem");
@@ -353,6 +366,31 @@ public class MainMenuManager
             "Trocar preset visual",
             CycleBodyPreset
         );
+
+        raceText =
+            AddBodyText(
+                GetSelectedRaceLabel()
+            );
+
+        AddButton(
+            "Trocar raca",
+            CycleRace
+        );
+
+        archetypeText =
+            AddBodyText(
+                GetSelectedArchetypeLabel()
+            );
+
+        AddButton(
+            "Trocar arquetipo",
+            CycleArchetype
+        );
+
+        characterPreviewText =
+            AddBodyText(
+                BuildCharacterCreationPreview()
+            );
 
         AddButton(
             "Confirmar personagem",
@@ -378,12 +416,78 @@ public class MainMenuManager
         }
     }
 
+    private void CycleRace()
+    {
+        List<RaceData> races =
+            GetPlayableRaces();
+
+        if (races.Count == 0)
+            return;
+
+        selectedRaceIndex =
+            (selectedRaceIndex + 1) %
+            races.Count;
+
+        RefreshCharacterCreationTexts();
+    }
+
+    private void CycleArchetype()
+    {
+        List<StartingArchetypeData> archetypes =
+            GetArchetypes();
+
+        if (archetypes.Count == 0)
+            return;
+
+        selectedArchetypeIndex =
+            (selectedArchetypeIndex + 1) %
+            archetypes.Count;
+
+        RefreshCharacterCreationTexts();
+    }
+
+    private void RefreshCharacterCreationTexts()
+    {
+        if (raceText != null)
+        {
+            raceText.text =
+                GetSelectedRaceLabel();
+        }
+
+        if (archetypeText != null)
+        {
+            archetypeText.text =
+                GetSelectedArchetypeLabel();
+        }
+
+        if (characterPreviewText != null)
+        {
+            characterPreviewText.text =
+                BuildCharacterCreationPreview();
+        }
+    }
+
     private void ConfirmCharacterCreation()
     {
         string characterName =
             characterNameInput != null
                 ? characterNameInput.text
                 : "Hero";
+
+        if (string.IsNullOrWhiteSpace(characterName))
+        {
+            GameFeedbackUI.ShowNotification(
+                "Digite um nome para o personagem."
+            );
+
+            return;
+        }
+
+        RaceData race =
+            GetSelectedRace();
+
+        StartingArchetypeData archetype =
+            GetSelectedArchetype();
 
         SaveManager
             .Instance
@@ -392,7 +496,12 @@ public class MainMenuManager
                 characterName,
                 bodyPresets[selectedBodyPresetIndex],
                 "portrait_default",
-                "race_human"
+                race != null
+                    ? race.ID
+                    : "race_human",
+                archetype != null
+                    ? archetype.ID
+                    : "archetype_adventurer"
             );
 
         SceneFlowManager
@@ -402,6 +511,185 @@ public class MainMenuManager
         GameFeedbackUI.ShowNotification(
             "Novo jogo iniciado."
         );
+    }
+
+    private List<RaceData> GetPlayableRaces()
+    {
+        if (DatabaseManager.Instance == null)
+            return new List<RaceData>();
+
+        return DatabaseManager
+            .Instance
+            .GetAllData<RaceData>()
+            .Where(race => race != null &&
+                race.IsPlayable)
+            .OrderBy(race => race.DisplayName)
+            .ToList();
+    }
+
+    private List<StartingArchetypeData> GetArchetypes()
+    {
+        if (DatabaseManager.Instance == null)
+            return new List<StartingArchetypeData>();
+
+        return DatabaseManager
+            .Instance
+            .GetAllData<StartingArchetypeData>()
+            .Where(archetype => archetype != null)
+            .OrderBy(archetype => archetype.DisplayName)
+            .ToList();
+    }
+
+    private RaceData GetSelectedRace()
+    {
+        List<RaceData> races =
+            GetPlayableRaces();
+
+        if (races.Count == 0)
+            return null;
+
+        selectedRaceIndex =
+            Mathf.Clamp(
+                selectedRaceIndex,
+                0,
+                races.Count - 1
+            );
+
+        return races[selectedRaceIndex];
+    }
+
+    private StartingArchetypeData GetSelectedArchetype()
+    {
+        List<StartingArchetypeData> archetypes =
+            GetArchetypes();
+
+        if (archetypes.Count == 0)
+            return null;
+
+        selectedArchetypeIndex =
+            Mathf.Clamp(
+                selectedArchetypeIndex,
+                0,
+                archetypes.Count - 1
+            );
+
+        return archetypes[selectedArchetypeIndex];
+    }
+
+    private string GetSelectedRaceLabel()
+    {
+        RaceData race =
+            GetSelectedRace();
+
+        if (race == null)
+            return "Raca: padrao";
+
+        return $"Raca: {race.DisplayName}\n{race.Description}";
+    }
+
+    private string GetSelectedArchetypeLabel()
+    {
+        StartingArchetypeData archetype =
+            GetSelectedArchetype();
+
+        if (archetype == null)
+            return "Arquetipo: padrao";
+
+        return $"Arquetipo: {archetype.DisplayName}\n{archetype.Description}";
+    }
+
+    private string BuildCharacterCreationPreview()
+    {
+        RaceData race =
+            GetSelectedRace();
+
+        StartingArchetypeData archetype =
+            GetSelectedArchetype();
+
+        string equipment =
+            "Equipamento inicial: nenhum";
+
+        if (archetype != null &&
+            archetype.StartingEquipment != null &&
+            archetype.StartingEquipment.Count > 0)
+        {
+            List<string> names =
+                new();
+
+            foreach (StartingEquipmentEntry entry
+                in archetype.StartingEquipment)
+            {
+                if (entry == null)
+                    continue;
+
+                ItemData item =
+                    DatabaseManager.Instance != null
+                        ? DatabaseManager
+                            .Instance
+                            .GetItemById(entry.ItemID)
+                        : null;
+
+                names.Add(
+                    item != null
+                        ? item.DisplayName
+                        : entry.ItemID
+                );
+            }
+
+            if (names.Count > 0)
+            {
+                equipment =
+                    $"Equipamento inicial: {string.Join(", ", names)}";
+            }
+        }
+
+        return "Previa\n" +
+            $"Elemento: {GetElementLabel(race, archetype)}\n" +
+            $"Bonus de Forca: {GetCreationStatBonus(race, archetype, StatType.Strength)}\n" +
+            $"Bonus de Inteligencia: {GetCreationStatBonus(race, archetype, StatType.Intelligence)}\n" +
+            $"Bonus de Vitalidade: {GetCreationStatBonus(race, archetype, StatType.Vitality)}\n" +
+            equipment;
+    }
+
+    private static int GetCreationStatBonus(
+        RaceData race,
+        StartingArchetypeData archetype,
+        StatType statType)
+    {
+        int total = 0;
+
+        if (race != null)
+            total += race.GetStatBonus(statType);
+
+        if (archetype != null)
+            total += archetype.GetStatBonus(statType);
+
+        return total;
+    }
+
+    private static string GetElementLabel(
+        RaceData race,
+        StartingArchetypeData archetype)
+    {
+        ElementType element =
+            race != null &&
+            race.PrimaryElement != ElementType.None
+                ? race.PrimaryElement
+                : archetype != null
+                    ? archetype.SuggestedElement
+                    : ElementType.None;
+
+        return element switch
+        {
+            ElementType.Water => "Agua",
+            ElementType.Fire => "Fogo",
+            ElementType.Electric => "Eletrico",
+            ElementType.Earth => "Terra",
+            ElementType.Air => "Ar",
+            ElementType.Light => "Luz",
+            ElementType.Darkness => "Escuridao",
+            _ => "Nenhum"
+        };
     }
 
     private void MoveToScene(

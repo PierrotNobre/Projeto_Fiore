@@ -32,5 +32,17 @@ public enum RequirementType
 
     CurrentCity,
 
-    CurrentExplorationArea
+    CurrentExplorationArea,
+
+    Race,
+
+    Archetype,
+
+    Element,
+
+    HasElementResistance,
+
+    HasEquippedItem,
+
+    HasEquipmentSlotFilled
 }

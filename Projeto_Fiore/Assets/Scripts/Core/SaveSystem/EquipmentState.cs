@@ -3,6 +3,10 @@ using System;
 [Serializable]
 public class EquipmentState
 {
+    public string MainHandItemID;
+
+    public string OffHandItemID;
+
     public string WeaponItemID;
 
     public string HeadItemID;
@@ -16,9 +20,13 @@ public class EquipmentState
     public string GetItemID(
         EquipmentSlot slot)
     {
+        EnsureRuntimeDefaults();
+
         return slot switch
         {
-            EquipmentSlot.Weapon => WeaponItemID,
+            EquipmentSlot.MainHand => MainHandItemID,
+
+            EquipmentSlot.OffHand => OffHandItemID,
 
             EquipmentSlot.Head => HeadItemID,
 
@@ -36,10 +44,17 @@ public class EquipmentState
         EquipmentSlot slot,
         string itemID)
     {
+        EnsureRuntimeDefaults();
+
         switch (slot)
         {
-            case EquipmentSlot.Weapon:
+            case EquipmentSlot.MainHand:
+                MainHandItemID = itemID;
                 WeaponItemID = itemID;
+                break;
+
+            case EquipmentSlot.OffHand:
+                OffHandItemID = itemID;
                 break;
 
             case EquipmentSlot.Head:
@@ -58,5 +73,18 @@ public class EquipmentState
                 AccessoryItemID = itemID;
                 break;
         }
+    }
+
+    public void EnsureRuntimeDefaults()
+    {
+        if (string.IsNullOrEmpty(MainHandItemID) &&
+            !string.IsNullOrEmpty(WeaponItemID))
+        {
+            MainHandItemID =
+                WeaponItemID;
+        }
+
+        WeaponItemID =
+            MainHandItemID;
     }
 }

@@ -10,6 +10,8 @@ public enum UIScreenType
 
     ExplorationEvent,
 
+    Combat,
+
     Character,
 
     Inventory,

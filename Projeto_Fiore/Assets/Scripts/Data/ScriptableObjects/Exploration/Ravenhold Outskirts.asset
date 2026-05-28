@@ -26,6 +26,7 @@ MonoBehaviour:
   Nodes: []
   PossibleEvents:
   - {fileID: 11400000, guid: 46ca43b9051f469889b2d9dce0ef1579, type: 2}
+  - {fileID: 11400000, guid: bd779b6ae8b54d02a22c1a27f9564f02, type: 2}
   Resources:
   - ResourceNodeID: rough_stone_node
     DisplayName: Pedras Brutas

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce6c11d9ac014c8a85ecf6082d55da2d, type: 3}
+  m_Name: Spark
+  m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  ID: spark
+  DisplayName: Faisca
+  Description: Uma habilidade elemental simples para testes.
+  SkillType: 1
+  ElementType: 3
+  EnergyCost: 5
+  Power: 5
+  ChargeTime: 4
+  CooldownTime: 0
+  AutoUseInCombat: 1
+  Priority: 0
+  TargetType: 0
+  Requirements: []

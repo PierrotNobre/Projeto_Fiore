@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3ec5d081d5141f6a81af9fa76f893a4, type: 3}
+  m_Name: Mage
+  m_EditorClassIdentifier: Assembly-CSharp::StartingArchetypeData
+  ID: archetype_mage
+  DisplayName: Mago
+  Description: Arquetipo inicial focado em inteligencia e fe.
+  StrengthBonus: 0
+  DexterityBonus: 0
+  IntelligenceBonus: 2
+  FaithBonus: 1
+  VitalityBonus: 0
+  CharismaBonus: 0
+  SuggestedElement: 0
+  StartingEquipment:
+  - ItemID: simple_wand
+    TargetSlot: 0
+  StartingItems: []
+  StartingSkillIDs:
+  - spark

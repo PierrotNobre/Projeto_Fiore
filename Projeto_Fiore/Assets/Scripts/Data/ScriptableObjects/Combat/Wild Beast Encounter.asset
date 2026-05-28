@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d93d00e3b1d44c2840e3d988faad38c, type: 3}
+  m_Name: Wild Beast Encounter
+  m_EditorClassIdentifier: Assembly-CSharp::CombatEncounterData
+  ID: encounter_wild_beast_test
+  DisplayName: Encontro com Criatura Selvagem
+  Description: Encontro simples de teste para a fundacao de combate.
+  Enemies:
+  - EnemyID: wild_beast_placeholder
+    Level: 1
+    Quantity: 1
+  VictoryReward:
+    Coins: 10
+    Items:
+    - ItemID: rough_stone
+      Quantity: 1
+    GuildReputation: 0
+    StatRewards: []
+  CanFlee: 1
+  Requirements: []
+  VictoryEventID: 
+  DefeatEventID: 

@@ -11,6 +11,8 @@ public class GameDatabase
     [Header("World")]
     public List<RaceData> Races;
 
+    public List<StartingArchetypeData> StartingArchetypes;
+
     public List<RegionData> Regions;
 
     public List<CityData> Cities;
@@ -35,6 +37,10 @@ public class GameDatabase
     public List<GuildTaskData> GuildTasks;
 
     public List<EnemyData> Enemies;
+
+    public List<CombatEncounterData> CombatEncounters;
+
+    public List<SkillData> Skills;
 
     [Header("Items")]
     public List<ItemData> Items;

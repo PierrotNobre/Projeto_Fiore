@@ -1,6 +1,6 @@
 public enum EquipmentSlot
 {
-    Weapon,
+    MainHand,
 
     Head,
 
@@ -8,5 +8,7 @@ public enum EquipmentSlot
 
     Legs,
 
-    Accessory
+    Accessory,
+
+    OffHand
 }

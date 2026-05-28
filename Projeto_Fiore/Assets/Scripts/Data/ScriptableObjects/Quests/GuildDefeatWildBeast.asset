@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
+  m_Name: GuildDefeatWildBeast
+  m_EditorClassIdentifier: Assembly-CSharp::QuestData
+  ID: guild_defeat_wild_beast
+  DisplayName: Afastar Criatura Selvagem
+  Description: Contrato simples de combate para a Guilda dos Gatos Negros.
+  QuestCategory: 2
+  RequiredGuildLevel: 1
+  Objectives: []
+  Steps:
+  - StepID: enter_ravenhold_outskirts
+    Title: Va aos arredores de Ravenhold
+    Description: Explore os arredores de Ravenhold.
+    ObjectiveType: 9
+    TargetID: ravenhold_outskirts
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: defeat_wild_beast_encounter
+    Title: Vença o encontro
+    Description: Enfrente a criatura selvagem nos arredores.
+    ObjectiveType: 16
+    TargetID: encounter_wild_beast_test
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  - StepID: report_to_guild_master
+    Title: Retorne para a guilda
+    Description: Fale com a Mestre da Guilda.
+    ObjectiveType: 0
+    TargetID: black_cats_guild_master
+    RequiredAmount: 1
+    StepReward:
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      StatRewards: []
+  Rewards:
+    Coins: 25
+    Items: []
+    GuildReputation: 12
+    StatRewards: []
+  GoldReward: 0
+  DeadlineDays: 0
+  ItemRewards: []
+  ReputationRewards: []

@@ -22,6 +22,7 @@ MonoBehaviour:
   CanSell: 1
   CanGift: 1
   GiftCategory: 0
+  EffectValue: 8
   EquipmentSlot: 0
   StatModifiers: []
   FlavorText: 

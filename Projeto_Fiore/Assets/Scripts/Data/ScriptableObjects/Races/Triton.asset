@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbfedbf905c7c1e40845ebd7f644d3e6, type: 3}
+  m_Name: Triton
+  m_EditorClassIdentifier: Assembly-CSharp::RaceData
+  ID: race_triton
+  DisplayName: Tritao
+  Description: Criado pela Deusa da Agua. Humanoide com caracteristicas marinhas e anfibias.
+  IsPlayable: 1
+  StrengthBonus: 0
+  DexterityBonus: 1
+  IntelligenceBonus: 0
+  FaithBonus: 0
+  VitalityBonus: 0
+  CharismaBonus: 1
+  PrimaryElement: 1
+  ElementalPowerModifiers:
+  - ElementType: 1
+    Value: 1
+  ElementalResistanceModifiers:
+  - ElementType: 1
+    Value: 1
+  StartingItemIDs: []
+  AverageLifespan: 0

@@ -135,6 +135,24 @@ public static class RequirementChecker
                 return CheckCurrentExplorationArea(
                     requirement
                 );
+
+            case RequirementType.Race:
+                return CheckRace(requirement);
+
+            case RequirementType.Archetype:
+                return CheckArchetype(requirement);
+
+            case RequirementType.Element:
+                return CheckElement(requirement);
+
+            case RequirementType.HasElementResistance:
+                return CheckElementResistance(requirement);
+
+            case RequirementType.HasEquippedItem:
+                return CheckEquippedItem(requirement);
+
+            case RequirementType.HasEquipmentSlotFilled:
+                return CheckEquipmentSlotFilled(requirement);
         }
 
         return true;
@@ -502,6 +520,136 @@ public static class RequirementChecker
         LogFailure(
             passed,
             $"Requirement failed: exploration area {currentAreaID}/{requirement.RequiredExplorationAreaID}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckRace(
+        RequirementData requirement)
+    {
+        string currentRaceID =
+            SaveManager.Instance != null &&
+            SaveManager.Instance.CurrentSave != null
+                ? SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Player
+                    .RaceID
+                : null;
+
+        bool passed =
+            currentRaceID == requirement.RequiredRaceID;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: race {currentRaceID}/{requirement.RequiredRaceID}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckArchetype(
+        RequirementData requirement)
+    {
+        string currentArchetypeID =
+            SaveManager.Instance != null &&
+            SaveManager.Instance.CurrentSave != null
+                ? SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Player
+                    .ArchetypeID
+                : null;
+
+        bool passed =
+            currentArchetypeID ==
+            requirement.RequiredArchetypeID;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: archetype {currentArchetypeID}/{requirement.RequiredArchetypeID}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckElement(
+        RequirementData requirement)
+    {
+        ElementType current =
+            CharacterManager.Instance != null
+                ? CharacterManager.Instance.PrimaryElement
+                : ElementType.None;
+
+        bool passed =
+            current == requirement.RequiredElementType;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: element {current}/{requirement.RequiredElementType}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckElementResistance(
+        RequirementData requirement)
+    {
+        int current =
+            CharacterManager.Instance != null
+                ? CharacterManager
+                    .Instance
+                    .GetElementResistance(
+                        requirement.RequiredElementType
+                    )
+                : 0;
+
+        bool passed =
+            current >= requirement.RequiredElementValue;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: element resistance {requirement.RequiredElementType} {current}/{requirement.RequiredElementValue}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckEquippedItem(
+        RequirementData requirement)
+    {
+        bool passed =
+            EquipmentManager
+                .GetOrCreate()
+                .IsItemEquipped(
+                    requirement.RequiredEquipmentItemID
+                );
+
+        LogFailure(
+            passed,
+            $"Requirement failed: equipped item {requirement.RequiredEquipmentItemID}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckEquipmentSlotFilled(
+        RequirementData requirement)
+    {
+        string itemID =
+            EquipmentManager
+                .GetOrCreate()
+                .GetEquippedItem(
+                    requirement.RequiredEquipmentSlot
+                );
+
+        bool passed =
+            !string.IsNullOrEmpty(itemID);
+
+        LogFailure(
+            passed,
+            $"Requirement failed: equipment slot empty {requirement.RequiredEquipmentSlot}"
         );
 
         return passed;

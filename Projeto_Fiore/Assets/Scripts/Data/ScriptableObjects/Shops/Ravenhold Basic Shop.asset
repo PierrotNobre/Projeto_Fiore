@@ -24,6 +24,15 @@ MonoBehaviour:
   - ItemID: simple_sword
     Price: 60
     QuantityPerPurchase: 1
+  - ItemID: simple_wand
+    Price: 55
+    QuantityPerPurchase: 1
+  - ItemID: simple_staff
+    Price: 80
+    QuantityPerPurchase: 1
+  - ItemID: simple_shield
+    Price: 45
+    QuantityPerPurchase: 1
   - ItemID: simple_cloak
     Price: 45
     QuantityPerPurchase: 1

@@ -14,12 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RaceData
   ID: race_human
   DisplayName: Humano
-  Description: "Os Humanos s\xE3o a ra\xE7a mais abundante no continente de Fiore,
-    estando em praticamente todos os reinos, foram seres criados por todos os Deuses
-    em conjunto."
-  BaseStrength: 5
-  BaseDexterity: 5
-  BaseIntelligence: 5
-  BaseFaith: 5
-  BaseVitality: 5
+  Description: Opcao padrao temporaria para testes de personagem.
+  IsPlayable: 1
+  StrengthBonus: 0
+  DexterityBonus: 0
+  IntelligenceBonus: 0
+  FaithBonus: 0
+  VitalityBonus: 0
+  CharismaBonus: 0
+  PrimaryElement: 0
+  ElementalPowerModifiers: []
+  ElementalResistanceModifiers: []
+  StartingItemIDs: []
   AverageLifespan: 120

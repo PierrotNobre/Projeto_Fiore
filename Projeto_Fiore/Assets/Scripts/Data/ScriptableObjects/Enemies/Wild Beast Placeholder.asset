@@ -16,13 +16,17 @@ MonoBehaviour:
   DisplayName: Criatura Selvagem
   Description: Criatura simples usada como placeholder para encontros perigosos.
   Sprite: {fileID: 0}
-  MaxHealth: 10
-  Attack: 1
-  Defense: 0
+  PrimaryElement: 0
+  MaxHealth: 30
+  Attack: 6
+  Defense: 2
+  Speed: 4
   Reward:
     Coins: 0
     Items: []
     GuildReputation: 0
     StatRewards: []
   Drops: []
+  Resistances: []
+  Weaknesses: []
   CanAppearInExploration: 1

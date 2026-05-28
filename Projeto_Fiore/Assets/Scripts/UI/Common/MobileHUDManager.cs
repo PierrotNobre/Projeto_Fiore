@@ -52,6 +52,18 @@ public class MobileHUDManager
     [SerializeField]
     private RectTransform travelEventChoicesRoot;
 
+    [SerializeField]
+    private RectTransform combatPopupRoot;
+
+    [SerializeField]
+    private TMP_Text combatPopupTitleText;
+
+    [SerializeField]
+    private RectTransform combatPopupContentRoot;
+
+    [SerializeField]
+    private RectTransform combatPopupActionsRoot;
+
     private readonly Dictionary<UIScreenType, Button>
         navButtons = new();
 
@@ -181,6 +193,35 @@ public class MobileHUDManager
         Instance.ShowScreen(screenType);
 
         return true;
+    }
+
+    public static bool TryShowCombatPopup()
+    {
+        MobileHUDManager manager =
+            OpenOrCreate();
+
+        if (manager == null)
+            return false;
+
+        manager.ShowCombatPopup();
+
+        return true;
+    }
+
+    public static void RefreshCombatPopup()
+    {
+        if (Instance == null)
+            return;
+
+        Instance.RefreshCombatPopupInternal();
+    }
+
+    public static void HideCombatPopup()
+    {
+        if (Instance == null)
+            return;
+
+        Instance.HideCombatPopupInternal();
     }
 
     public static bool OpenNPCInteraction(
@@ -324,6 +365,10 @@ public class MobileHUDManager
 
             case UIScreenType.ExplorationEvent:
                 BuildExplorationEventScreen();
+                break;
+
+            case UIScreenType.Combat:
+                BuildCombatScreen();
                 break;
 
             case UIScreenType.Character:
@@ -483,23 +528,36 @@ public class MobileHUDManager
             AddBody("Nenhum local disponivel.");
         }
 
-        AddExplorationAreaSummary();
-
         if (city.Services != null &&
             city.Services.Count > 0)
         {
-            AddBody("Servicos diretos");
+            bool hasVisibleService =
+                false;
 
             foreach (CityServiceType service
                 in city.Services)
             {
-                if (service == CityServiceType.None)
+                if (service == CityServiceType.None ||
+                    service == CityServiceType.Travel)
+                {
                     continue;
+                }
+
+                if (!hasVisibleService)
+                {
+                    AddBody("Servicos diretos");
+                    hasVisibleService = true;
+                }
 
                 AddButton(
                     GetServiceLabel(service),
                     () => OpenService(service)
                 );
+            }
+
+            if (!hasVisibleService)
+            {
+                AddBody("Nenhum servico direto disponivel.");
             }
         }
         else
@@ -552,28 +610,6 @@ public class MobileHUDManager
         }
     }
 
-    private void AddExplorationAreaSummary()
-    {
-        List<ExplorationAreaData> areas =
-            ExplorationManager.GetOrCreate()
-                .GetAreasForCurrentCity();
-
-        AddBody("Exploracao");
-
-        if (areas.Count == 0)
-        {
-            AddBody("Nenhuma area proxima disponivel.");
-            return;
-        }
-
-        AddButton(
-            "Explorar arredores",
-            () => ShowScreen(
-                UIScreenType.ExplorationAreas
-            )
-        );
-    }
-
     private void BuildTravelScreen()
     {
         AddTitle("Viagem");
@@ -603,50 +639,121 @@ public class MobileHUDManager
                 : "Cidade atual nao encontrada."
         );
 
-        if (city == null ||
-            city.Connections == null ||
-            city.Connections.Count == 0)
+        AddBody("Rotas de viagem");
+
+        bool hasRoutes =
+            city != null &&
+            city.Connections != null &&
+            city.Connections.Count > 0;
+
+        if (!hasRoutes)
         {
             AddBody(
-                "Nenhum destino disponivel."
+                "Nenhuma rota disponivel."
+            );
+        }
+
+        if (hasRoutes)
+        {
+            foreach (CityConnection connection
+                in city.Connections)
+            {
+                if (connection == null ||
+                    connection.ConnectedCity == null)
+                {
+                    continue;
+                }
+
+                CityData destination =
+                    connection.ConnectedCity;
+
+                string description =
+                    !string.IsNullOrEmpty(
+                        connection.RouteDescription)
+                        ? connection.RouteDescription
+                        : destination.Description;
+
+                AddCard(
+                    destination.DisplayName,
+                    $"{description}\nDuracao: {connection.TravelHours}h"
+                );
+
+                AddButton(
+                    $"Viajar para {destination.DisplayName}",
+                    () =>
+                    {
+                        TravelManager
+                            .Instance
+                            .TravelTo(destination);
+
+                        ShowScreen(UIScreenType.Travel);
+                    }
+                );
+            }
+        }
+
+        AddExplorationAreaSection();
+    }
+
+    private void AddExplorationAreaSection()
+    {
+        AddBody("Areas de exploracao");
+
+        List<ExplorationAreaData> areas =
+            ExplorationManager
+                .GetOrCreate()
+                .GetAreasForCurrentCity();
+
+        if (areas.Count == 0)
+        {
+            AddBody(
+                "Nenhuma area de exploracao disponivel."
             );
 
             return;
         }
 
-        foreach (CityConnection connection
-            in city.Connections)
+        foreach (ExplorationAreaData area
+            in areas)
         {
-            if (connection == null ||
-                connection.ConnectedCity == null)
-            {
+            if (area == null)
                 continue;
-            }
 
-            CityData destination =
-                connection.ConnectedCity;
-
-            string description =
-                !string.IsNullOrEmpty(
-                    connection.RouteDescription)
-                    ? connection.RouteDescription
-                    : destination.Description;
+            bool canEnter =
+                ExplorationManager
+                    .GetOrCreate()
+                    .CanEnterArea(area);
 
             AddCard(
-                destination.DisplayName,
-                $"{description}\nDuracao: {connection.TravelHours}h"
+                area.DisplayName,
+                $"{area.Description}\n" +
+                $"Tempo ate a area: {Mathf.Max(0, area.TravelTimeCostInPeriods)} periodo(s)\n" +
+                $"Nivel recomendado: {Mathf.Max(1, area.RecommendedLevel)}"
             );
 
+            ExplorationAreaData capturedArea =
+                area;
+
             AddButton(
-                $"Viajar para {destination.DisplayName}",
+                canEnter
+                    ? $"Explorar {area.DisplayName}"
+                    : "Area bloqueada",
                 () =>
                 {
-                    TravelManager
-                        .Instance
-                        .TravelTo(destination);
+                    if (!ExplorationManager
+                        .GetOrCreate()
+                        .StartExploration(capturedArea))
+                    {
+                        return;
+                    }
 
-                    ShowScreen(UIScreenType.Travel);
-                }
+                    ShowScreen(
+                        UIScreenType.Exploration
+                    );
+                },
+                canEnter
+                    ? new Color(0.22f, 0.18f, 0.12f, 1f)
+                    : new Color(0.1f, 0.1f, 0.1f, 1f)
             );
         }
     }
@@ -767,8 +874,8 @@ public class MobileHUDManager
         }
 
         AddButton(
-            "Voltar para cidade",
-            () => ShowScreen(UIScreenType.City)
+            "Voltar para viagem",
+            () => ShowScreen(UIScreenType.Travel)
         );
     }
 
@@ -1018,6 +1125,19 @@ public class MobileHUDManager
                         .ResolveActiveEventChoice(
                             capturedChoice
                         );
+
+                    if (CombatManager.Instance != null &&
+                        CombatManager.Instance.IsInCombat)
+                    {
+                        ShowScreen(
+                            exploration.State.IsExploring
+                                ? UIScreenType.Exploration
+                                : UIScreenType.City
+                        );
+
+                        TryShowCombatPopup();
+                        return;
+                    }
 
                     ShowScreen(
                         exploration.State.IsExploring
@@ -1278,6 +1398,16 @@ public class MobileHUDManager
             "Salvar jogo",
             () =>
             {
+                if (CombatManager.Instance != null &&
+                    CombatManager.Instance.IsInCombat)
+                {
+                    GameFeedbackUI.ShowNotification(
+                        "Nao e possivel salvar durante o combate."
+                    );
+
+                    return;
+                }
+
                 SaveManager.Instance.SaveGame();
                 GameFeedbackUI.ShowNotification(
                     "Jogo salvo."
@@ -1323,16 +1453,40 @@ public class MobileHUDManager
         WalletManager wallet =
             WalletManager.GetOrCreate();
 
+        RaceData race =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<RaceData>(
+                        player.RaceID
+                    )
+                : null;
+
+        StartingArchetypeData archetype =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<StartingArchetypeData>(
+                        player.ArchetypeID
+                    )
+                : null;
+
+        CharacterManager character =
+            CharacterManager.Instance;
+
         AddBody(
             $"Nome: {player.PlayerName}\n" +
+            $"Raca: {(race != null ? race.DisplayName : player.RaceID)}\n" +
+            $"Arquetipo: {(archetype != null ? archetype.DisplayName : player.ArchetypeID)}\n" +
+            $"Elemento: {GetElementLabel(player.Elements.PrimaryElement)}\n" +
             $"Preset visual: {player.BodyPresetID}\n" +
             $"Retrato: {player.PortraitID}\n" +
             $"Cidade atual: {save.Location.CurrentCityID}\n\n" +
             $"Moedas: {wallet.GetCoins()}\n" +
             $"Nivel: {stats.Level}\n" +
             $"Experiencia: {stats.Experience}\n" +
-            $"HP atual: {stats.CurrentHP}\n" +
-            $"Estamina atual: {stats.CurrentStamina}"
+            $"Vida: {stats.CurrentHP}/{(character != null ? character.MaxHP : stats.CurrentHP)}\n" +
+            $"Energia: {stats.CurrentStamina}/{(character != null ? character.MaxStamina : stats.CurrentStamina)}"
         );
 
         AddCard(
@@ -1483,8 +1637,7 @@ public class MobileHUDManager
         );
 
         foreach (EquipmentSlot slot
-            in System.Enum.GetValues(
-                typeof(EquipmentSlot)))
+            in EquipmentManager.GetEquipmentSlots())
         {
             string itemID =
                 EquipmentManager
@@ -1501,11 +1654,18 @@ public class MobileHUDManager
             string equippedName =
                 itemData != null
                     ? itemData.DisplayName
-                    : "Vazio";
+                    : slot == EquipmentSlot.OffHand &&
+                        EquipmentManager
+                            .GetOrCreate()
+                            .IsOffHandBlocked()
+                        ? "Bloqueado por item de duas maos"
+                        : "Vazio";
 
             AddCard(
                 GetSlotLabel(slot),
-                equippedName
+                itemData != null
+                    ? $"{equippedName}\n{GetEquipmentSummary(itemData)}"
+                    : equippedName
             );
 
             if (!string.IsNullOrEmpty(itemID))
@@ -1571,23 +1731,40 @@ public class MobileHUDManager
             AddCard(
                 itemData.DisplayName,
                 $"Slot: {GetSlotLabel(itemData.EquipmentSlot)}\n" +
-                $"Bonus: {GetEquipmentBonusText(itemData)}"
+                $"Compatibilidade: {GetEquipmentCompatibilityText(itemData)}\n" +
+                $"{GetEquipmentSummary(itemData)}"
             );
 
             string itemID =
                 stack.ItemID;
 
-            AddButton(
-                $"Equipar {itemData.DisplayName}",
-                () =>
-                {
-                    EquipmentManager
-                        .GetOrCreate()
-                        .EquipItem(itemID);
-
-                    ShowScreen(UIScreenType.Equipment);
-                }
+            AddEquipButtonIfCompatible(
+                itemData,
+                itemID,
+                EquipmentSlot.MainHand
             );
+
+            AddEquipButtonIfCompatible(
+                itemData,
+                itemID,
+                EquipmentSlot.OffHand
+            );
+
+            if (itemData.EquipmentSlot != EquipmentSlot.MainHand &&
+                itemData.EquipmentSlot != EquipmentSlot.OffHand)
+            {
+                AddButton(
+                    $"Equipar {itemData.DisplayName}",
+                    () =>
+                    {
+                        EquipmentManager
+                            .GetOrCreate()
+                            .EquipItem(itemID);
+
+                        ShowScreen(UIScreenType.Equipment);
+                    }
+                );
+            }
         }
 
         if (!foundEquipment)
@@ -1648,6 +1825,7 @@ public class MobileHUDManager
         {
             AddQuestBoardEntry("guild_test_delivery");
             AddQuestBoardEntry("guild_gather_rough_stone");
+            AddQuestBoardEntry("guild_defeat_wild_beast");
         }
         else
         {
@@ -2025,6 +2203,78 @@ public class MobileHUDManager
         return true;
     }
 
+    private void AddEquipButtonIfCompatible(
+        ItemData itemData,
+        string itemID,
+        EquipmentSlot slot)
+    {
+        if (itemData == null ||
+            !itemData.CanEquipInSlot(slot))
+        {
+            return;
+        }
+
+        if (slot == EquipmentSlot.OffHand &&
+            EquipmentManager
+                .GetOrCreate()
+                .IsOffHandBlocked())
+        {
+            AddButton(
+                "Mao secundaria bloqueada",
+                () =>
+                {
+                    GameFeedbackUI.ShowNotification(
+                        "A mao secundaria esta bloqueada por um item de duas maos."
+                    );
+                },
+                new Color(0.1f, 0.1f, 0.1f, 1f)
+            );
+
+            return;
+        }
+
+        AddButton(
+            $"Equipar na {GetSlotLabel(slot)}",
+            () =>
+            {
+                EquipmentManager
+                    .GetOrCreate()
+                    .EquipItem(
+                        itemID,
+                        slot
+                    );
+
+                ShowScreen(UIScreenType.Equipment);
+            }
+        );
+    }
+
+    private void BuildCombatScreen()
+    {
+        CombatManager combat =
+            CombatManager.GetOrCreate();
+
+        if (combat.IsInCombat ||
+            combat.State.AwaitingContinue)
+        {
+            AddTitle("Combate automatico");
+            AddBody(
+                "O combate esta acontecendo no popup."
+            );
+            ShowCombatPopup();
+            return;
+        }
+
+        AddTitle("Combate");
+        AddBody(
+            "Nenhum combate ativo."
+        );
+        AddButton(
+            "Voltar",
+            () => ShowScreen(UIScreenType.Exploration)
+        );
+    }
+
     private List<ShopItemEntry> GetDefaultShopItems()
     {
         return new List<ShopItemEntry>
@@ -2045,6 +2295,24 @@ public class MobileHUDManager
             {
                 ItemID = "simple_sword",
                 Price = 60,
+                QuantityPerPurchase = 1
+            },
+            new ShopItemEntry
+            {
+                ItemID = "simple_wand",
+                Price = 55,
+                QuantityPerPurchase = 1
+            },
+            new ShopItemEntry
+            {
+                ItemID = "simple_staff",
+                Price = 80,
+                QuantityPerPurchase = 1
+            },
+            new ShopItemEntry
+            {
+                ItemID = "simple_shield",
+                Price = 45,
                 QuantityPerPurchase = 1
             }
         };
@@ -2084,8 +2352,11 @@ public class MobileHUDManager
             foreach (CityServiceType service
                 in selectedLocation.Services)
             {
-                if (service == CityServiceType.None)
+                if (service == CityServiceType.None ||
+                    service == CityServiceType.Travel)
+                {
                     continue;
+                }
 
                 AddButton(
                     GetServiceLabel(service),
@@ -2262,11 +2533,6 @@ public class MobileHUDManager
         AddNPCServiceButton(
             NPCServiceType.Inn,
             "Estalagem"
-        );
-
-        AddNPCServiceButton(
-            NPCServiceType.Travel,
-            "Viagem"
         );
 
         AddButton(
@@ -2991,6 +3257,7 @@ public class MobileHUDManager
         );
 
         BuildTravelEventPopup();
+        BuildCombatPopup();
     }
 
     private void BuildTravelEventPopup()
@@ -3175,6 +3442,468 @@ public class MobileHUDManager
         travelEventPopupRoot
             .gameObject
             .SetActive(false);
+    }
+
+    private void BuildCombatPopup()
+    {
+        combatPopupRoot =
+            CreateRect(
+                "CombatPopup",
+                root,
+                new Vector2(0.06f, 0.16f),
+                new Vector2(0.94f, 0.86f)
+            );
+
+        AddImage(
+            combatPopupRoot.gameObject,
+            new Color(0.055f, 0.048f, 0.04f, 0.98f)
+        );
+
+        VerticalLayoutGroup popupLayout =
+            combatPopupRoot
+                .gameObject
+                .AddComponent<VerticalLayoutGroup>();
+
+        popupLayout.padding =
+            new RectOffset(18, 18, 18, 18);
+
+        popupLayout.spacing =
+            10f;
+
+        popupLayout.childForceExpandWidth =
+            true;
+
+        popupLayout.childForceExpandHeight =
+            false;
+
+        combatPopupTitleText =
+            CreatePopupText(
+                "CombatPopupTitle",
+                combatPopupRoot,
+                29f,
+                48f,
+                TextAlignmentOptions.Center
+            );
+
+        combatPopupContentRoot =
+            CreateLayoutRect(
+                "CombatPopupContent",
+                combatPopupRoot,
+                580f
+            );
+
+        VerticalLayoutGroup contentLayout =
+            combatPopupContentRoot
+                .gameObject
+                .AddComponent<VerticalLayoutGroup>();
+
+        contentLayout.spacing =
+            8f;
+
+        contentLayout.childForceExpandWidth =
+            true;
+
+        contentLayout.childForceExpandHeight =
+            false;
+
+        combatPopupActionsRoot =
+            CreateLayoutRect(
+                "CombatPopupActions",
+                combatPopupRoot,
+                84f
+            );
+
+        VerticalLayoutGroup actionLayout =
+            combatPopupActionsRoot
+                .gameObject
+                .AddComponent<VerticalLayoutGroup>();
+
+        actionLayout.spacing =
+            8f;
+
+        actionLayout.childForceExpandWidth =
+            true;
+
+        actionLayout.childForceExpandHeight =
+            false;
+
+        combatPopupRoot
+            .gameObject
+            .SetActive(false);
+    }
+
+    private void ShowCombatPopup()
+    {
+        if (combatPopupRoot == null)
+        {
+            BuildCombatPopup();
+        }
+
+        RefreshCombatPopupInternal();
+
+        combatPopupRoot
+            .gameObject
+            .SetActive(true);
+    }
+
+    private void RefreshCombatPopupInternal()
+    {
+        if (combatPopupRoot == null)
+            return;
+
+        CombatManager combat =
+            CombatManager.Instance;
+
+        if (combat == null ||
+            combat.State == null ||
+            (!combat.State.IsInCombat &&
+                !combat.State.AwaitingContinue))
+        {
+            HideCombatPopupInternal();
+            return;
+        }
+
+        combatPopupTitleText.text =
+            string.IsNullOrEmpty(
+                combat.State.EncounterDisplayName)
+                ? "Combate"
+                : combat.State.EncounterDisplayName;
+
+        ClearChildren(combatPopupContentRoot);
+        ClearChildren(combatPopupActionsRoot);
+
+        BuildCombatPopupContent(combat);
+
+        combatPopupRoot
+            .gameObject
+            .SetActive(true);
+
+        Canvas.ForceUpdateCanvases();
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(
+            combatPopupRoot
+        );
+    }
+
+    private void HideCombatPopupInternal()
+    {
+        if (combatPopupRoot == null)
+            return;
+
+        combatPopupRoot
+            .gameObject
+            .SetActive(false);
+    }
+
+    private void BuildCombatPopupContent(
+        CombatManager combat)
+    {
+        CombatState state =
+            combat.State;
+
+        CombatantRuntimeData player =
+            combat.GetPlayerCombatant();
+
+        CombatantRuntimeData enemy =
+            combat.GetFirstAliveEnemy();
+
+        AddCombatPopupText(
+            GetCombatPhaseLabel(state.Phase),
+            36f,
+            22f,
+            TextAlignmentOptions.Center
+        );
+
+        if (enemy != null)
+        {
+            AddCombatPopupSpriteFrame(
+                combat.GetCombatantSprite(enemy),
+                90f
+            );
+        }
+
+        if (player != null)
+        {
+            string playerBody =
+                $"Vida {BuildPopupBar(player.Stats.CurrentHealth, player.Stats.MaxHealth)} " +
+                $"{player.Stats.CurrentHealth}/{player.Stats.MaxHealth}\n" +
+                $"Energia {BuildPopupBar(player.Stats.CurrentEnergy, player.Stats.MaxEnergy)} " +
+                $"{player.Stats.CurrentEnergy}/{player.Stats.MaxEnergy}\n" +
+                $"Ataque principal {BuildPopupBar(player.BasicAttackTimer, player.BasicAttackInterval)}";
+
+            if (player.CanUseOffHandAttack)
+            {
+                playerBody +=
+                    $"\nAtaque secundario {BuildPopupBar(player.OffHandAttackTimer, player.OffHandAttackInterval)}";
+            }
+
+            AddCombatPopupCard(
+                player.DisplayName,
+                playerBody
+            );
+
+            AddCombatSkillProgress(player);
+        }
+
+        if (enemy != null)
+        {
+            AddCombatPopupCard(
+                enemy.DisplayName,
+                $"Vida {BuildPopupBar(enemy.Stats.CurrentHealth, enemy.Stats.MaxHealth)} " +
+                $"{enemy.Stats.CurrentHealth}/{enemy.Stats.MaxHealth}\n" +
+                $"Ataque {BuildPopupBar(enemy.BasicAttackTimer, enemy.BasicAttackInterval)}\n" +
+                $"Elemento: {GetElementLabel(enemy.Stats.PrimaryElement)}"
+            );
+        }
+        else
+        {
+            AddCombatPopupCard(
+                "Inimigos",
+                "Nenhum inimigo ativo."
+            );
+        }
+
+        AddCombatLog(state);
+
+        if (state.Phase == CombatPhase.Running)
+        {
+            if (state.CanFlee)
+            {
+                AddCombatPopupButton(
+                    "Fugir",
+                    () => CombatManager
+                        .GetOrCreate()
+                        .FleeCombat(),
+                    new Color(0.18f, 0.12f, 0.1f, 1f)
+                );
+            }
+            else
+            {
+                AddCombatPopupButton(
+                    "Fuga indisponivel",
+                    () => GameFeedbackUI.ShowNotification(
+                        "Nao e possivel fugir deste combate."
+                    ),
+                    new Color(0.1f, 0.1f, 0.1f, 1f)
+                );
+            }
+        }
+
+        if (state.AwaitingContinue)
+        {
+            AddCombatPopupButton(
+                "Continuar",
+                () => CombatManager
+                    .GetOrCreate()
+                    .ContinueAfterCombat(),
+                new Color(0.24f, 0.18f, 0.1f, 1f)
+            );
+        }
+    }
+
+    private void AddCombatSkillProgress(
+        CombatantRuntimeData player)
+    {
+        if (player.SkillRuntimes == null ||
+            player.SkillRuntimes.Count == 0)
+        {
+            return;
+        }
+
+        string body =
+            string.Empty;
+
+        foreach (CombatSkillRuntimeData runtime
+            in player.SkillRuntimes)
+        {
+            SkillData skill =
+                DatabaseManager
+                    .Instance
+                    .GetData<SkillData>(
+                        runtime.SkillID
+                    );
+
+            if (skill == null)
+                continue;
+
+            float chargeTime =
+                Mathf.Max(0.1f, skill.ChargeTime);
+
+            string stateText =
+                player.Stats.CurrentEnergy < skill.EnergyCost
+                    ? "Sem energia"
+                    : runtime.CooldownRemaining > 0f
+                        ? "Recarga"
+                        : runtime.CurrentCharge >= chargeTime
+                            ? "Pronta"
+                            : $"{Mathf.RoundToInt(runtime.CurrentCharge / chargeTime * 100f)}%";
+
+            body +=
+                $"{skill.DisplayName}: {BuildPopupBar(runtime.CurrentCharge, chargeTime)} {stateText}\n";
+        }
+
+        if (string.IsNullOrEmpty(body))
+            return;
+
+        AddCombatPopupCard(
+            "Habilidades automaticas",
+            body.TrimEnd(),
+            132f
+        );
+    }
+
+    private void AddCombatLog(
+        CombatState state)
+    {
+        if (state.Logs == null ||
+            state.Logs.Count == 0)
+        {
+            return;
+        }
+
+        AddCombatPopupCard(
+            "Acoes recentes",
+            string.Join("\n", state.Logs),
+            168f
+        );
+    }
+
+    private void AddCombatPopupText(
+        string text,
+        float minHeight,
+        float fontSize,
+        TextAlignmentOptions alignment)
+    {
+        TMP_Text body =
+            CreatePopupText(
+                "CombatPopupText",
+                combatPopupContentRoot,
+                fontSize,
+                minHeight,
+                alignment
+            );
+
+        body.text =
+            text;
+    }
+
+    private void AddCombatPopupCard(
+        string title,
+        string body,
+        float minHeight = 104f)
+    {
+        RectTransform cardRoot =
+            CreateLayoutRect(
+                "CombatPopupCard",
+                combatPopupContentRoot,
+                minHeight
+            );
+
+        AddImage(
+            cardRoot.gameObject,
+            new Color(0.105f, 0.095f, 0.08f, 1f)
+        );
+
+        TMP_Text cardText =
+            CreateText(
+                "CombatPopupCardText",
+                cardRoot,
+                new Vector2(0.04f, 0.1f),
+                new Vector2(0.96f, 0.9f),
+                20f,
+                TextAlignmentOptions.TopLeft
+            );
+
+        cardText.text =
+            $"<b>{title}</b>\n{body}";
+    }
+
+    private void AddCombatPopupSpriteFrame(
+        Sprite sprite,
+        float minHeight)
+    {
+        RectTransform frame =
+            CreateLayoutRect(
+                "CombatPopupSpriteFrame",
+                combatPopupContentRoot,
+                minHeight
+            );
+
+        Image image =
+            AddImage(
+                frame.gameObject,
+                Color.white
+            );
+
+        image.sprite =
+            sprite;
+
+        image.preserveAspect =
+            true;
+    }
+
+    private void AddCombatPopupButton(
+        string label,
+        UnityEngine.Events.UnityAction onClick,
+        Color color)
+    {
+        Button button =
+            CreateButtonObject(
+                label,
+                combatPopupActionsRoot,
+                color
+            );
+
+        button.onClick.AddListener(onClick);
+    }
+
+    private string BuildPopupBar(
+        int current,
+        int max)
+    {
+        return BuildPopupBar(
+            (float)current,
+            Mathf.Max(1, max)
+        );
+    }
+
+    private string BuildPopupBar(
+        float current,
+        float max)
+    {
+        int segments = 10;
+
+        float progress =
+            max <= 0f
+                ? 0f
+                : Mathf.Clamp01(current / max);
+
+        int filled =
+            Mathf.RoundToInt(progress * segments);
+
+        return "[" +
+            new string('#', filled) +
+            new string('-', segments - filled) +
+            "]";
+    }
+
+    private string GetCombatPhaseLabel(
+        CombatPhase phase)
+    {
+        return phase switch
+        {
+            CombatPhase.Running => "Em combate",
+
+            CombatPhase.Victory => "Vitoria",
+
+            CombatPhase.Defeat => "Derrota",
+
+            CombatPhase.Flee => "Fuga",
+
+            CombatPhase.Starting => "Iniciando combate",
+
+            _ => "Combate"
+        };
     }
 
     private void AddPopupChoiceButton(
@@ -3792,6 +4521,61 @@ public class MobileHUDManager
             : "Sem bonus.";
     }
 
+    private string GetEquipmentSummary(
+        ItemData itemData)
+    {
+        if (itemData == null)
+            return "Sem dados.";
+
+        string handText =
+            itemData.IsTwoHanded
+                ? "Duas maos"
+                : "Uma mao";
+
+        string elementText =
+            itemData.AttackElement != ElementType.None
+                ? $"\nElemento: {GetElementLabel(itemData.AttackElement)}"
+                : string.Empty;
+
+        return $"Bonus: {GetEquipmentBonusText(itemData)}\n" +
+            $"Uso: {handText}" +
+            elementText;
+    }
+
+    private string GetEquipmentCompatibilityText(
+        ItemData itemData)
+    {
+        if (itemData == null ||
+            !itemData.IsEquipment)
+        {
+            return "Nao equipavel";
+        }
+
+        List<string> parts =
+            new();
+
+        if (itemData.CanEquipInSlot(
+            EquipmentSlot.MainHand))
+        {
+            parts.Add("Mao principal");
+        }
+
+        if (itemData.CanEquipInSlot(
+            EquipmentSlot.OffHand))
+        {
+            parts.Add("Mao secundaria");
+        }
+
+        if (parts.Count == 0)
+        {
+            parts.Add(
+                GetSlotLabel(itemData.EquipmentSlot)
+            );
+        }
+
+        return string.Join(", ", parts);
+    }
+
     private string GetStatLabel(
         StatType statType)
     {
@@ -3818,7 +4602,9 @@ public class MobileHUDManager
     {
         return slot switch
         {
-            EquipmentSlot.Weapon => "Arma",
+            EquipmentSlot.MainHand => "Mao principal",
+
+            EquipmentSlot.OffHand => "Mao secundaria",
 
             EquipmentSlot.Head => "Cabeca",
 
@@ -3830,6 +4616,46 @@ public class MobileHUDManager
 
             _ => slot.ToString()
         };
+    }
+
+    private string GetElementLabel(
+        ElementType elementType)
+    {
+        return elementType switch
+        {
+            ElementType.None => "Nenhum",
+
+            ElementType.Water => "Agua",
+
+            ElementType.Fire => "Fogo",
+
+            ElementType.Electric => "Eletrico",
+
+            ElementType.Earth => "Terra",
+
+            ElementType.Air => "Ar",
+
+            ElementType.Light => "Luz",
+
+            ElementType.Darkness => "Escuridao",
+
+            _ => elementType.ToString()
+        };
+    }
+
+    private string GetCombatTurnLabel(
+        CombatState state)
+    {
+        if (state == null ||
+            state.CurrentCombatant == null)
+        {
+            return "Indefinido";
+        }
+
+        return state.CurrentCombatant.Type ==
+            CombatantType.Player
+            ? "Jogador"
+            : state.CurrentCombatant.DisplayName;
     }
 
     private string GetItemTypeLabel(

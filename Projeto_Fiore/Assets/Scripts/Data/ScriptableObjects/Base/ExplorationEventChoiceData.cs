@@ -16,6 +16,10 @@ public class ExplorationEventChoiceData
 
     public string ResultText;
 
+    public CombatEncounterData CombatEncounter;
+
+    public string CombatEncounterID;
+
     public int TimeCostInPeriods = 1;
 
     public bool EndsExploration;

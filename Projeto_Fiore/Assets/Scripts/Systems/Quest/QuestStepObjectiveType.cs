@@ -30,5 +30,13 @@ public enum QuestStepObjectiveType
 
     ReachNPCRelationshipLevel,
 
-    Manual
+    Manual,
+
+    CompleteCombatEncounter,
+
+    UseSkill,
+
+    WinCombat,
+
+    FleeCombat
 }

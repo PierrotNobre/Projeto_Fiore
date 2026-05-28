@@ -14,6 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameDatabase
   Races:
   - {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
+  - {fileID: 11400000, guid: e4523391102746a4b0408d5f6e9350b3, type: 2}
+  - {fileID: 11400000, guid: f5d701f4039d4466b07d04db88e60c09, type: 2}
+  StartingArchetypes:
+  - {fileID: 11400000, guid: b15f07953e144188a8ef1d2b4bd1581f, type: 2}
+  - {fileID: 11400000, guid: c21ad44bf9554493abf0f0670ae90c61, type: 2}
+  - {fileID: 11400000, guid: d32c40dfe2314b3180ef25a64c9a04ea, type: 2}
   Regions:
   - {fileID: 11400000, guid: 8b10a4389b3e05742a11e62460a77868, type: 2}
   Cities:
@@ -41,10 +47,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e723c18fb523452fb786de009f266fe3, type: 2}
   - {fileID: 11400000, guid: f35867e0c9f244b3b5144315bce003d7, type: 2}
   - {fileID: 11400000, guid: d404e7c2fb284ce1b3cfe7dfd690a534, type: 2}
+  - {fileID: 11400000, guid: a2a2c6e28e964ef69c0bff4b761ac601, type: 2}
   GuildTasks:
   - {fileID: 11400000, guid: e1ce7c6d53034bfe9a3fca1f1a4a2771, type: 2}
   Enemies:
   - {fileID: 11400000, guid: 99a09084e78546afae8d750ed84f4d39, type: 2}
+  CombatEncounters:
+  - {fileID: 11400000, guid: b4ff910c3a5a4e39b98b0769d5026fa0, type: 2}
+  Skills:
+  - {fileID: 11400000, guid: f116ca18d38448048fca79338deaf1f9, type: 2}
+  - {fileID: 11400000, guid: afac5a17cf0f4fe490dd0c8a9e70fb4d, type: 2}
   Items:
   - {fileID: 11400000, guid: 2f84a569260c046409800d702dc4b6c1, type: 2}
   - {fileID: 11400000, guid: dd1a0d9dc9c640009dc6062bad209d31, type: 2}
@@ -52,6 +64,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 72ab016e493a429da9ef7fbe120f1fd9, type: 2}
   - {fileID: 11400000, guid: bba30103c3da4c70902a25cff3615ffb, type: 2}
   - {fileID: 11400000, guid: 767f3b289c24487b959a847d91c8f21c, type: 2}
+  - {fileID: 11400000, guid: a6e643bbd05747f2b5b1df0b11b42207, type: 2}
+  - {fileID: 11400000, guid: b7af6c56bc82480d9602a4d9563bd331, type: 2}
+  - {fileID: 11400000, guid: c8df76cd71b448e7acbb5fa21c8bc7e8, type: 2}
   Factions:
   - {fileID: 11400000, guid: 524c1c8f23fc85846bc7e323a29fff57, type: 2}
   Dialogues:

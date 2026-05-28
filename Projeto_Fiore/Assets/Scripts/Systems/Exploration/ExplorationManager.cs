@@ -343,6 +343,38 @@ public class ExplorationManager
             return false;
         }
 
+        CombatEncounterData encounter =
+            choice.CombatEncounter;
+
+        if (encounter == null &&
+            !string.IsNullOrEmpty(choice.CombatEncounterID))
+        {
+            encounter =
+                DatabaseManager
+                    .Instance
+                    .GetData<CombatEncounterData>(
+                        choice.CombatEncounterID
+                    );
+        }
+
+        if (encounter != null)
+        {
+            string eventID =
+                ActiveEvent.ID;
+
+            ActiveEvent = null;
+
+            CombatManager
+                .GetOrCreate()
+                .StartCombat(
+                    encounter,
+                    State.CurrentAreaID,
+                    eventID
+                );
+
+            return true;
+        }
+
         RewardManager.ApplyReward(
             ActiveEvent.Reward,
             ActiveEvent.ID

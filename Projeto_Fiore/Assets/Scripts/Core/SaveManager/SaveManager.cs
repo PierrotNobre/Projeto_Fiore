@@ -31,7 +31,8 @@ public class SaveManager : PersistentSingleton<SaveManager>
             "Hero",
             "body_default",
             "portrait_default",
-            "race_human"
+            "race_human",
+            "archetype_adventurer"
         );
     }
 
@@ -40,7 +41,8 @@ public class SaveManager : PersistentSingleton<SaveManager>
         string characterName,
         string bodyPresetID,
         string portraitID,
-        string raceID = "race_human")
+        string raceID = "race_human",
+        string archetypeID = "archetype_adventurer")
     {
         CurrentSaveSlot =
             NormalizeSlot(slotID);
@@ -75,6 +77,11 @@ public class SaveManager : PersistentSingleton<SaveManager>
             string.IsNullOrWhiteSpace(raceID)
                 ? "race_human"
                 : raceID;
+
+        CurrentSave.Player.ArchetypeID =
+            string.IsNullOrWhiteSpace(archetypeID)
+                ? "archetype_adventurer"
+                : archetypeID;
 
         CurrentSave.Location.CurrentCityID =
             "city_lunaris";
@@ -113,17 +120,27 @@ public class SaveManager : PersistentSingleton<SaveManager>
         CurrentSave.Equipment =
             new EquipmentState();
 
+        CurrentSave.Equipment.EnsureRuntimeDefaults();
+
         CurrentSave.QuestStates.Clear();
         CurrentSave.ActiveQuests.Clear();
         CurrentSave.Inventory.Clear();
         CurrentSave.Reputation.Clear();
 
+        ApplyCharacterElementDefaults();
+        ApplyStartingSkills();
         ApplyCharacterRuntimeDefaults();
         AddInitialInventoryItems();
+        ApplyStartingEquipment();
+        ApplyCharacterRuntimeDefaults();
 
         TravelEventManager
             .Instance
             ?.ClearActiveEvent();
+
+        CombatManager
+            .Instance
+            ?.ClearCombat();
 
         HasActiveGame =
             true;
@@ -146,6 +163,20 @@ public class SaveManager : PersistentSingleton<SaveManager>
     public void SaveGame(
         int slotID)
     {
+        if (CombatManager.Instance != null &&
+            CombatManager.Instance.IsInCombat)
+        {
+            Debug.Log(
+                "Save blocked during combat."
+            );
+
+            GameFeedbackUI.ShowNotification(
+                "Nao e possivel salvar durante o combate."
+            );
+
+            return;
+        }
+
         EnsureRuntimeSave();
 
         CurrentSaveSlot =
@@ -230,6 +261,10 @@ public class SaveManager : PersistentSingleton<SaveManager>
         TravelEventManager
             .Instance
             ?.ClearActiveEvent();
+
+        CombatManager
+            .Instance
+            ?.ClearCombat();
 
         WorldStateManager.Instance?.LoadFlags();
 
@@ -377,6 +412,10 @@ public class SaveManager : PersistentSingleton<SaveManager>
             .Instance
             ?.ClearActiveEvent();
 
+        CombatManager
+            .Instance
+            ?.ClearCombat();
+
         SceneFlowManager
             .GetOrCreate()
             .ShowMainMenu();
@@ -415,7 +454,9 @@ public class SaveManager : PersistentSingleton<SaveManager>
             1,
             "Hero",
             "body_default",
-            "portrait_default"
+            "portrait_default",
+            "race_human",
+            "archetype_adventurer"
         );
     }
 
@@ -449,6 +490,89 @@ public class SaveManager : PersistentSingleton<SaveManager>
             CharacterManager.Instance.MaxStamina;
     }
 
+    private void ApplyCharacterElementDefaults()
+    {
+        CurrentSave.Player.EnsureRuntimeDefaults();
+
+        RaceData race =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<RaceData>(
+                        CurrentSave.Player.RaceID
+                    )
+                : null;
+
+        StartingArchetypeData archetype =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<StartingArchetypeData>(
+                        CurrentSave.Player.ArchetypeID
+                    )
+                : null;
+
+        ElementType primaryElement =
+            race != null &&
+            race.PrimaryElement != ElementType.None
+                ? race.PrimaryElement
+                : archetype != null
+                    ? archetype.SuggestedElement
+                    : ElementType.None;
+
+        CurrentSave.Player.Elements.PrimaryElement =
+            primaryElement;
+
+        if (race != null)
+        {
+            CurrentSave.Player.Elements.PowerBonuses =
+                race.ElementalPowerModifiers != null
+                    ? new System.Collections.Generic.List<ElementModifier>(
+                        race.ElementalPowerModifiers
+                    )
+                    : new System.Collections.Generic.List<ElementModifier>();
+
+            CurrentSave.Player.Elements.Resistances =
+                race.ElementalResistanceModifiers != null
+                    ? new System.Collections.Generic.List<ElementModifier>(
+                        race.ElementalResistanceModifiers
+                    )
+                    : new System.Collections.Generic.List<ElementModifier>();
+        }
+    }
+
+    private void ApplyStartingSkills()
+    {
+        CurrentSave.Player.KnownSkillIDs.Clear();
+
+        StartingArchetypeData archetype =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<StartingArchetypeData>(
+                        CurrentSave.Player.ArchetypeID
+                    )
+                : null;
+
+        if (archetype == null ||
+            archetype.StartingSkillIDs == null)
+        {
+            return;
+        }
+
+        foreach (string skillID
+            in archetype.StartingSkillIDs)
+        {
+            if (string.IsNullOrEmpty(skillID) ||
+                CurrentSave.Player.KnownSkillIDs.Contains(skillID))
+            {
+                continue;
+            }
+
+            CurrentSave.Player.KnownSkillIDs.Add(skillID);
+        }
+    }
+
     private void AddInitialInventoryItems()
     {
         AddInitialItem(
@@ -462,20 +586,128 @@ public class SaveManager : PersistentSingleton<SaveManager>
         );
 
         AddInitialItem(
-            "simple_sword",
-            1
-        );
-
-        AddInitialItem(
             "rough_stone",
             2
         );
+
+        RaceData race =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<RaceData>(
+                        CurrentSave.Player.RaceID
+                    )
+                : null;
+
+        if (race != null &&
+            race.StartingItemIDs != null)
+        {
+            foreach (string itemID
+                in race.StartingItemIDs)
+            {
+                AddInitialItem(
+                    itemID,
+                    1
+                );
+            }
+        }
+
+        StartingArchetypeData archetype =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<StartingArchetypeData>(
+                        CurrentSave.Player.ArchetypeID
+                    )
+                : null;
+
+        if (archetype == null ||
+            archetype.StartingItems == null)
+        {
+            return;
+        }
+
+        foreach (RewardItemData reward
+            in archetype.StartingItems)
+        {
+            if (reward == null)
+                continue;
+
+            AddInitialItem(
+                reward.ItemID,
+                reward.Quantity
+            );
+        }
+    }
+
+    private void ApplyStartingEquipment()
+    {
+        StartingArchetypeData archetype =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<StartingArchetypeData>(
+                        CurrentSave.Player.ArchetypeID
+                    )
+                : null;
+
+        if (archetype == null ||
+            archetype.StartingEquipment == null)
+        {
+            return;
+        }
+
+        foreach (StartingEquipmentEntry entry
+            in archetype.StartingEquipment)
+        {
+            if (entry == null ||
+                string.IsNullOrEmpty(entry.ItemID))
+            {
+                continue;
+            }
+
+            ItemData itemData =
+                DatabaseManager.Instance != null
+                    ? DatabaseManager
+                        .Instance
+                        .GetItemById(entry.ItemID)
+                    : null;
+
+            if (itemData == null ||
+                !itemData.IsEquipment)
+            {
+                continue;
+            }
+
+            EquipmentSlot slot =
+                entry.TargetSlot;
+
+            CurrentSave.Equipment.SetItemID(
+                slot,
+                entry.ItemID
+            );
+
+            if (slot == EquipmentSlot.MainHand &&
+                itemData.IsTwoHanded)
+            {
+                CurrentSave.Equipment.SetItemID(
+                    EquipmentSlot.OffHand,
+                    null
+                );
+            }
+        }
     }
 
     private void AddInitialItem(
         string itemID,
         int quantity)
     {
+        if (string.IsNullOrEmpty(itemID) ||
+            quantity <= 0)
+        {
+            return;
+        }
+
         CurrentSave.Inventory.Add(
             new InventoryItem
             {

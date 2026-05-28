@@ -23,7 +23,13 @@ MonoBehaviour:
   CanGift: 1
   GiftCategory: 6
   EquipmentSlot: 0
+  IsTwoHanded: 0
+  CanEquipInMainHand: 1
+  CanEquipInOffHand: 1
+  AttackElement: 0
   StatModifiers:
   - StatType: 0
     Value: 1
+  ElementalPowerModifiers: []
+  ElementalResistanceModifiers: []
   FlavorText: 

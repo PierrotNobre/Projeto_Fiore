@@ -47,4 +47,17 @@ public class RequirementData
     public string RequiredCityID;
 
     public string RequiredExplorationAreaID;
+
+    public string RequiredRaceID;
+
+    public string RequiredArchetypeID;
+
+    public ElementType RequiredElementType;
+
+    public int RequiredElementValue;
+
+    public string RequiredEquipmentItemID;
+
+    public EquipmentSlot RequiredEquipmentSlot =
+        EquipmentSlot.MainHand;
 }
