@@ -41,6 +41,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d24c9b85e43a4065ba98c48435981114, type: 2}
   - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
   - {fileID: 11400000, guid: 789df2f12fe24581998ae32b86bc5f2c, type: 2}
+  - {fileID: 11400000, guid: d9f61c80e4c94f36aa17ff0f90a9a034, type: 2}
   Locations:
   - LocationID: ravenhold_black_cats_guild
     DisplayName: Guilda dos Gatos Negros
@@ -49,6 +50,7 @@ MonoBehaviour:
     LocationSprite: {fileID: 0}
     NPCs:
     - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
+    - {fileID: 11400000, guid: d9f61c80e4c94f36aa17ff0f90a9a034, type: 2}
     NPCIDs: []
     Services: 030000000a000000
     ShopData: {fileID: 0}

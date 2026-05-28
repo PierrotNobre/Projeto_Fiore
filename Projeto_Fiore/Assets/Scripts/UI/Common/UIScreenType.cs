@@ -18,6 +18,12 @@ public enum UIScreenType
 
     Equipment,
 
+    AttributeLevelUp,
+
+    CombatSettings,
+
+    Party,
+
     Guild,
 
     GuildMembers,

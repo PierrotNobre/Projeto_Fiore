@@ -26,9 +26,20 @@ public class SkillData
 
     public int Priority;
 
+    public int RequiredLevel = 1;
+
+    public bool LearnedByDefault;
+
+    public string ArchetypeID;
+
+    public string RaceID;
+
     public SkillTargetType TargetType =
         SkillTargetType.SingleEnemy;
 
     public List<RequirementData> Requirements =
+        new();
+
+    public List<RequirementData> UnlockRequirements =
         new();
 }

@@ -28,6 +28,9 @@ public class PlayerData
     public List<string> KnownSkillIDs =
         new();
 
+    public AutoCombatSettings AutoCombat =
+        new();
+
     public int Gold = 100;
 
     public void EnsureRuntimeDefaults()
@@ -53,5 +56,14 @@ public class PlayerData
         {
             KnownSkillIDs = new List<string>();
         }
+
+        if (AutoCombat == null)
+        {
+            AutoCombat = new AutoCombatSettings();
+        }
+
+        AutoCombat.EnsureRuntimeDefaults(
+            KnownSkillIDs
+        );
     }
 }

@@ -122,6 +122,18 @@ public class SaveManager : PersistentSingleton<SaveManager>
 
         CurrentSave.Equipment.EnsureRuntimeDefaults();
 
+        CurrentSave.Stats =
+            new PlayerStatsData();
+
+        CurrentSave.Stats.EnsureRuntimeDefaults();
+
+        CurrentSave.Party =
+            new PartyState();
+
+        CurrentSave.Party.EnsureRuntimeDefaults();
+
+        CurrentSave.CompanionStates.Clear();
+
         CurrentSave.QuestStates.Clear();
         CurrentSave.ActiveQuests.Clear();
         CurrentSave.Inventory.Clear();
@@ -267,6 +279,10 @@ public class SaveManager : PersistentSingleton<SaveManager>
             ?.ClearCombat();
 
         WorldStateManager.Instance?.LoadFlags();
+
+        CharacterManager
+            .Instance
+            ?.CheckSkillUnlocks();
 
         Debug.Log(
             $"Game loaded successfully. Slot: {CurrentSaveSlot}"
@@ -554,23 +570,60 @@ public class SaveManager : PersistentSingleton<SaveManager>
                     )
                 : null;
 
-        if (archetype == null ||
-            archetype.StartingSkillIDs == null)
+        if (archetype != null &&
+            archetype.StartingSkillIDs != null)
+        {
+            foreach (string skillID
+                in archetype.StartingSkillIDs)
+            {
+                AddStartingSkill(skillID);
+            }
+        }
+
+        if (DatabaseManager.Instance != null)
+        {
+            foreach (SkillData skill
+                in DatabaseManager
+                    .Instance
+                    .GetAllData<SkillData>())
+            {
+                if (skill == null ||
+                    !skill.LearnedByDefault)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(skill.ArchetypeID) &&
+                    skill.ArchetypeID != CurrentSave.Player.ArchetypeID)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(skill.RaceID) &&
+                    skill.RaceID != CurrentSave.Player.RaceID)
+                {
+                    continue;
+                }
+
+                AddStartingSkill(skill.ID);
+            }
+        }
+
+        CurrentSave
+            .Player
+            .EnsureRuntimeDefaults();
+    }
+
+    private void AddStartingSkill(
+        string skillID)
+    {
+        if (string.IsNullOrEmpty(skillID) ||
+            CurrentSave.Player.KnownSkillIDs.Contains(skillID))
         {
             return;
         }
 
-        foreach (string skillID
-            in archetype.StartingSkillIDs)
-        {
-            if (string.IsNullOrEmpty(skillID) ||
-                CurrentSave.Player.KnownSkillIDs.Contains(skillID))
-            {
-                continue;
-            }
-
-            CurrentSave.Player.KnownSkillIDs.Add(skillID);
-        }
+        CurrentSave.Player.KnownSkillIDs.Add(skillID);
     }
 
     private void AddInitialInventoryItems()

@@ -44,5 +44,13 @@ public enum DialogueActionType
 
     TriggerRelationshipEvent,
 
+    RecruitCompanion,
+
+    AddCompanionToGuild,
+
+    AddCompanionToParty,
+
+    RemoveCompanionFromParty,
+
     ShowNotification
 }

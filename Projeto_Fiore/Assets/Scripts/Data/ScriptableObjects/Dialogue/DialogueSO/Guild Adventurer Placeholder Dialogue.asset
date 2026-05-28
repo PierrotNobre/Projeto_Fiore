@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 206ec89237ec7414ba1d4c401fe345b3, type: 3}
+  m_Name: Guild Adventurer Placeholder Dialogue
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  ID: dialogue_guild_adventurer_placeholder
+  DisplayName: Dialogue Guild Adventurer Placeholder
+  Description: Dialogo simples para testar recrutamento de companheiro.
+  StartNodeID: start
+  Nodes:
+  - NodeID: start
+    SpeakerName: Aventureiro da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: Estou pronto para ajudar a guilda quando precisarem.
+    NextNodeID: 
+    Choices:
+    - ChoiceText: Entrar para a guilda.
+      NextNodeID: recruited
+      Requirements: []
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions:
+      - ActionType: 22
+        TargetID: 
+        Amount: 0
+        BoolValue: 0
+        CompanionID: guild_adventurer_placeholder_companion
+        NPCID: guild_adventurer_placeholder
+        AddToActiveParty: 0
+        Reward:
+          Experience: 0
+          Coins: 0
+          Items: []
+          GuildReputation: 0
+          CompanionRewards: []
+          StatRewards: []
+        NotificationMessage: 
+      Consequences: []
+    - ChoiceText: Ate depois.
+      NextNodeID: bye
+      Requirements: []
+      GenericRequirements: []
+      HideIfRequirementsFail: 0
+      LockedText: 
+      Actions: []
+      Consequences: []
+    EndsDialogue: 0
+  - NodeID: recruited
+    SpeakerName: Aventureiro da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: Certo. Vou me apresentar na Guilda dos Gatos Negros.
+    NextNodeID: 
+    Choices: []
+    EndsDialogue: 1
+  - NodeID: bye
+    SpeakerName: Aventureiro da Guilda
+    Portrait: {fileID: 0}
+    SpeakerText: Ate mais.
+    NextNodeID: 
+    Choices: []
+    EndsDialogue: 1

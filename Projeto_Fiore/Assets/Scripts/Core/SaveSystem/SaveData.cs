@@ -34,6 +34,10 @@ public class SaveData
 
     public PlayerStatsData Stats = new();
 
+    public PartyState Party = new();
+
+    public List<CompanionState> CompanionStates = new();
+
     public List<ReputationData> Reputation = new();
 
     public List<NPCRelationshipSaveData> NPCRelationships = new();
@@ -129,6 +133,27 @@ public class SaveData
         if (Stats == null)
         {
             Stats = new PlayerStatsData();
+        }
+
+        Stats.EnsureRuntimeDefaults();
+
+        if (Party == null)
+        {
+            Party = new PartyState();
+        }
+
+        Party.EnsureRuntimeDefaults();
+
+        if (CompanionStates == null)
+        {
+            CompanionStates =
+                new List<CompanionState>();
+        }
+
+        foreach (CompanionState companionState
+            in CompanionStates)
+        {
+            companionState?.EnsureRuntimeDefaults();
         }
 
         if (Reputation == null)

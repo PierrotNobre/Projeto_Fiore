@@ -383,6 +383,18 @@ public class MobileHUDManager
                 BuildEquipmentScreen();
                 break;
 
+            case UIScreenType.AttributeLevelUp:
+                BuildAttributeLevelUpScreen();
+                break;
+
+            case UIScreenType.CombatSettings:
+                BuildCombatSettingsScreen();
+                break;
+
+            case UIScreenType.Party:
+                BuildPartyScreen();
+                break;
+
             case UIScreenType.Guild:
                 BuildGuildScreen();
                 break;
@@ -1192,6 +1204,11 @@ public class MobileHUDManager
         );
 
         AddButton(
+            "Grupo",
+            () => ShowScreen(UIScreenType.Party)
+        );
+
+        AddButton(
             "Melhorias",
             () => GameFeedbackUI.ShowNotification(
                 "Melhorias da guilda serao expandidas depois."
@@ -1268,9 +1285,14 @@ public class MobileHUDManager
                     ? $"\n\nEtapa atual: {currentStep.Title}\n{currentStep.Description}\nProgresso: {QuestManager.Instance.GetCurrentStepProgress(state.QuestID)}/{Mathf.Max(1, currentStep.RequiredAmount)}"
                     : string.Empty;
 
+            string rewardText =
+                quest != null
+                    ? $"\n\nRecompensa:\n{RewardManager.BuildRewardSummary(quest.Rewards)}"
+                    : string.Empty;
+
             AddCard(
                 title,
-                $"{description}\nEstado: {state.Status}{stepText}"
+                $"{description}\nEstado: {state.Status}{stepText}{rewardText}"
             );
         }
     }
@@ -1286,9 +1308,18 @@ public class MobileHUDManager
 
         guild.EnsureRuntimeDefaults();
 
-        GuildManager
-            .Instance
-            .EnsurePlaceholderMember();
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        List<CompanionState> recruitedCompanions =
+            companionManager.GetRecruitedCompanions();
+
+        if (recruitedCompanions.Count == 0)
+        {
+            GuildManager
+                .Instance
+                .EnsurePlaceholderMember();
+        }
 
         foreach (GuildMemberState member
             in guild.Members)
@@ -1298,17 +1329,34 @@ public class MobileHUDManager
 
             member.EnsureRuntimeDefaults();
 
+            CompanionState companionState =
+                companionManager.GetCompanionState(
+                    member.MemberID,
+                    false
+                );
+
+            bool isCompanion =
+                companionState != null &&
+                companionState.IsRecruited;
+
             string memberName =
-                member.MemberID ==
-                "guild_member_placeholder"
-                    ? "Aventureiro da Guilda"
-                    : member.MemberID;
+                isCompanion
+                    ? companionManager.GetCompanionDisplayName(
+                        member.MemberID
+                    )
+                    : member.MemberID ==
+                        "guild_member_placeholder"
+                        ? "Aventureiro da Guilda"
+                        : member.MemberID;
 
             string status =
-                string.IsNullOrEmpty(
-                    member.CurrentTaskID)
-                    ? "Disponivel"
-                    : $"Em tarefa: {member.CurrentTaskID}\nRetorna em {Mathf.Max(0, member.RemainingTaskPeriods)} periodos";
+                isCompanion &&
+                companionState.IsInActiveParty
+                    ? "Na party"
+                    : string.IsNullOrEmpty(
+                        member.CurrentTaskID)
+                        ? "Disponivel"
+                        : $"Em tarefa: {member.CurrentTaskID}\nRetorna em {Mathf.Max(0, member.RemainingTaskPeriods)} periodos";
 
             AddCard(
                 memberName,
@@ -1317,7 +1365,11 @@ public class MobileHUDManager
 
             if (string.IsNullOrEmpty(
                 member.CurrentTaskID) &&
-                member.IsAvailableForGuildTasks)
+                member.IsAvailableForGuildTasks &&
+                (!isCompanion ||
+                    companionManager.CanCompanionDoGuildTasks(
+                        member.MemberID
+                    )))
             {
                 string capturedMemberID =
                     member.MemberID;
@@ -1339,7 +1391,56 @@ public class MobileHUDManager
                     }
                 );
             }
+
+            if (isCompanion &&
+                !companionState.IsInActiveParty &&
+                string.IsNullOrEmpty(
+                    companionState.CurrentGuildTaskID))
+            {
+                string capturedCompanionID =
+                    companionState.CompanionID;
+
+                AddButton(
+                    $"Adicionar ao grupo: {memberName}",
+                    () =>
+                    {
+                        companionManager.AddToParty(
+                            capturedCompanionID
+                        );
+
+                        ShowScreen(
+                            UIScreenType.GuildMembers
+                        );
+                    }
+                );
+            }
+
+            if (isCompanion &&
+                companionState.IsInActiveParty)
+            {
+                string capturedCompanionID =
+                    companionState.CompanionID;
+
+                AddButton(
+                    $"Remover do grupo: {memberName}",
+                    () =>
+                    {
+                        companionManager.RemoveFromParty(
+                            capturedCompanionID
+                        );
+
+                        ShowScreen(
+                            UIScreenType.GuildMembers
+                        );
+                    }
+                );
+            }
         }
+
+        AddButton(
+            "Gerenciar grupo",
+            () => ShowScreen(UIScreenType.Party)
+        );
 
         AddButton(
             "Voltar para guilda",
@@ -1484,7 +1585,9 @@ public class MobileHUDManager
             $"Cidade atual: {save.Location.CurrentCityID}\n\n" +
             $"Moedas: {wallet.GetCoins()}\n" +
             $"Nivel: {stats.Level}\n" +
-            $"Experiencia: {stats.Experience}\n" +
+            $"Experiencia: {stats.Experience}/{stats.ExperienceToNextLevel}\n" +
+            $"Pontos de atributo: {stats.UnspentAttributePoints}\n" +
+            $"Grupo ativo: jogador + {save.Party.ActivePartyMemberIDs.Count}/{save.Party.MaxPartySize}\n" +
             $"Vida: {stats.CurrentHP}/{(character != null ? character.MaxHP : stats.CurrentHP)}\n" +
             $"Energia: {stats.CurrentStamina}/{(character != null ? character.MaxStamina : stats.CurrentStamina)}"
         );
@@ -1500,6 +1603,26 @@ public class MobileHUDManager
         );
 
         AddButton(
+            stats.UnspentAttributePoints > 0
+                ? "Distribuir pontos"
+                : "Distribuir pontos (sem pontos)",
+            () => ShowScreen(UIScreenType.AttributeLevelUp),
+            stats.UnspentAttributePoints > 0
+                ? new Color(0.22f, 0.18f, 0.12f, 1f)
+                : new Color(0.1f, 0.1f, 0.1f, 1f)
+        );
+
+        AddButton(
+            "Configurar combate",
+            () => ShowScreen(UIScreenType.CombatSettings)
+        );
+
+        AddButton(
+            "Gerenciar grupo",
+            () => ShowScreen(UIScreenType.Party)
+        );
+
+        AddButton(
             "Abrir inventario",
             () => ShowScreen(UIScreenType.Inventory)
         );
@@ -1507,6 +1630,355 @@ public class MobileHUDManager
         AddButton(
             "Abrir equipamentos",
             () => ShowScreen(UIScreenType.Equipment)
+        );
+    }
+
+    private void BuildAttributeLevelUpScreen()
+    {
+        AddTitle("Evoluir");
+
+        PlayerStatsData stats =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Stats;
+
+        AddBody(
+            $"Pontos disponiveis: {stats.UnspentAttributePoints}\n" +
+            "Cada ponto aumenta 1 atributo base."
+        );
+
+        AddAttributeSpendButton(StatType.Strength, "Forca");
+        AddAttributeSpendButton(StatType.Dexterity, "Destreza");
+        AddAttributeSpendButton(StatType.Intelligence, "Inteligencia");
+        AddAttributeSpendButton(StatType.Faith, "Fe");
+        AddAttributeSpendButton(StatType.Vitality, "Vitalidade");
+        AddAttributeSpendButton(StatType.Charisma, "Carisma");
+
+        AddButton(
+            "Voltar ao personagem",
+            () => ShowScreen(UIScreenType.Character)
+        );
+    }
+
+    private void AddAttributeSpendButton(
+        StatType statType,
+        string label)
+    {
+        PlayerStatsData stats =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Stats;
+
+        AddCard(
+            label,
+            $"Base: {stats.GetStat(statType)}\n" +
+            $"Total: {CharacterManager.GetOrCreate().GetTotalStat(statType)}"
+        );
+
+        AddButton(
+            stats.UnspentAttributePoints > 0
+                ? $"+1 {label}"
+                : "Sem pontos disponiveis",
+            () =>
+            {
+                if (stats.UnspentAttributePoints <= 0)
+                {
+                    GameFeedbackUI.ShowNotification(
+                        "Nenhum ponto de atributo disponivel."
+                    );
+
+                    return;
+                }
+
+                CharacterManager
+                    .GetOrCreate()
+                    .SpendAttributePoint(statType);
+
+                ShowScreen(UIScreenType.AttributeLevelUp);
+            },
+            stats.UnspentAttributePoints > 0
+                ? new Color(0.22f, 0.18f, 0.12f, 1f)
+                : new Color(0.1f, 0.1f, 0.1f, 1f)
+        );
+    }
+
+    private void BuildCombatSettingsScreen()
+    {
+        AddTitle("Combate automatico");
+
+        PlayerData player =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player;
+
+        player.EnsureRuntimeDefaults();
+
+        AutoCombatSettings settings =
+            player.AutoCombat;
+
+        AddBody(
+            $"Habilidades automaticas: {(settings.AllowAutoSkills ? "Ativas" : "Inativas")}\n" +
+            $"Ataque secundario: {(settings.AllowOffHandAttack ? "Ativo" : "Inativo")}"
+        );
+
+        AddButton(
+            settings.AllowAutoSkills
+                ? "Desativar habilidades"
+                : "Ativar habilidades",
+            () =>
+            {
+                settings.AllowAutoSkills =
+                    !settings.AllowAutoSkills;
+
+                SaveManager.Instance.SaveGame();
+                ShowScreen(UIScreenType.CombatSettings);
+            }
+        );
+
+        AddButton(
+            settings.AllowOffHandAttack
+                ? "Desativar ataque secundario"
+                : "Ativar ataque secundario",
+            () =>
+            {
+                settings.AllowOffHandAttack =
+                    !settings.AllowOffHandAttack;
+
+                SaveManager.Instance.SaveGame();
+                ShowScreen(UIScreenType.CombatSettings);
+            }
+        );
+
+        AddBody("Habilidades");
+
+        if (player.KnownSkillIDs == null ||
+            player.KnownSkillIDs.Count == 0)
+        {
+            AddBody("Nenhuma habilidade conhecida.");
+        }
+        else
+        {
+            foreach (string skillID
+                in player.KnownSkillIDs)
+            {
+                SkillData skill =
+                    DatabaseManager
+                        .Instance
+                        .GetData<SkillData>(skillID);
+
+                string skillName =
+                    skill != null
+                        ? skill.DisplayName
+                        : skillID;
+
+                bool enabled =
+                    settings.EnabledSkillIDs != null &&
+                    settings.EnabledSkillIDs.Contains(skillID);
+
+                AddCard(
+                    skillName,
+                    $"Estado: {(enabled ? "Habilitada" : "Desabilitada")}\n" +
+                    (skill != null
+                        ? $"Carga: {skill.ChargeTime:0.#}s | Energia: {skill.EnergyCost}"
+                        : string.Empty)
+                );
+
+                string capturedSkillID =
+                    skillID;
+
+                AddButton(
+                    enabled
+                        ? $"Desabilitar {skillName}"
+                        : $"Habilitar {skillName}",
+                    () =>
+                    {
+                        settings.SetSkillEnabled(
+                            capturedSkillID,
+                            !enabled
+                        );
+
+                        SaveManager.Instance.SaveGame();
+                        ShowScreen(UIScreenType.CombatSettings);
+                    }
+                );
+            }
+        }
+
+        AddButton(
+            "Voltar ao personagem",
+            () => ShowScreen(UIScreenType.Character)
+        );
+    }
+
+    private void BuildPartyScreen()
+    {
+        AddTitle("Grupo");
+
+        SaveData save =
+            SaveManager
+                .Instance
+                .CurrentSave;
+
+        save.Party.EnsureRuntimeDefaults();
+
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        AddCard(
+            save.Player.PlayerName,
+            "Protagonista\nSempre participa do combate."
+        );
+
+        AddBody(
+            $"Companheiros ativos: {save.Party.ActivePartyMemberIDs.Count}/{save.Party.MaxPartySize}"
+        );
+
+        List<CompanionState> activeCompanions =
+            companionManager.GetActivePartyCompanions();
+
+        if (activeCompanions.Count == 0)
+        {
+            AddBody(
+                "Nenhum companheiro no grupo ativo."
+            );
+        }
+
+        foreach (CompanionState companionState
+            in activeCompanions)
+        {
+            AddCompanionPartyEntry(
+                companionState,
+                isActiveEntry: true
+            );
+        }
+
+        AddBody("Disponiveis na guilda");
+
+        List<CompanionState> recruitedCompanions =
+            companionManager.GetRecruitedCompanions();
+
+        bool hasAvailable =
+            false;
+
+        foreach (CompanionState companionState
+            in recruitedCompanions)
+        {
+            if (companionState == null ||
+                companionState.IsInActiveParty)
+            {
+                continue;
+            }
+
+            hasAvailable = true;
+
+            AddCompanionPartyEntry(
+                companionState,
+                isActiveEntry: false
+            );
+        }
+
+        if (!hasAvailable)
+        {
+            AddBody(
+                "Nenhum companheiro disponivel fora do grupo."
+            );
+        }
+
+        AddButton(
+            "Voltar para guilda",
+            () => ShowScreen(UIScreenType.Guild)
+        );
+    }
+
+    private void AddCompanionPartyEntry(
+        CompanionState companionState,
+        bool isActiveEntry)
+    {
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        string companionName =
+            companionManager.GetCompanionDisplayName(
+                companionState.CompanionID
+            );
+
+        CompanionData companionData =
+            companionManager.GetCompanionById(
+                companionState.CompanionID
+            );
+
+        string status =
+            !string.IsNullOrEmpty(
+                companionState.CurrentGuildTaskID)
+                ? $"Em tarefa: {companionState.CurrentGuildTaskID}"
+                : companionState.IsUnavailable
+                    ? "Indisponivel"
+                    : companionState.IsInActiveParty
+                        ? "Na party"
+                        : "Disponivel";
+
+        AddCard(
+            companionName,
+            $"Nivel: {companionState.Level}\n" +
+            $"Raca: {GetCompanionRaceLabel(companionData)}\n" +
+            $"Arquetipo: {GetCompanionArchetypeLabel(companionData)}\n" +
+            $"Vida: {companionState.CurrentVitals.CurrentHealth}/{companionState.CurrentVitals.MaxHealth}\n" +
+            $"Energia: {companionState.CurrentVitals.CurrentEnergy}/{companionState.CurrentVitals.MaxEnergy}\n" +
+            $"Estado: {status}"
+        );
+
+        string capturedCompanionID =
+            companionState.CompanionID;
+
+        if (isActiveEntry)
+        {
+            AddButton(
+                $"Remover {companionName}",
+                () =>
+                {
+                    companionManager.RemoveFromParty(
+                        capturedCompanionID
+                    );
+
+                    ShowScreen(UIScreenType.Party);
+                }
+            );
+
+            return;
+        }
+
+        bool canAdd =
+            string.IsNullOrEmpty(
+                companionState.CurrentGuildTaskID
+            ) &&
+            !companionState.IsUnavailable;
+
+        AddButton(
+            canAdd
+                ? $"Adicionar {companionName}"
+                : $"{companionName} indisponivel",
+            () =>
+            {
+                if (!canAdd)
+                {
+                    GameFeedbackUI.ShowNotification(
+                        "Companheiro indisponivel."
+                    );
+                    return;
+                }
+
+                companionManager.AddToParty(
+                    capturedCompanionID
+                );
+
+                ShowScreen(UIScreenType.Party);
+            },
+            canAdd
+                ? new Color(0.22f, 0.18f, 0.12f, 1f)
+                : new Color(0.1f, 0.1f, 0.1f, 1f)
         );
     }
 
@@ -1826,6 +2298,7 @@ public class MobileHUDManager
             AddQuestBoardEntry("guild_test_delivery");
             AddQuestBoardEntry("guild_gather_rough_stone");
             AddQuestBoardEntry("guild_defeat_wild_beast");
+            AddQuestBoardEntry("recruit_guild_adventurer_test");
         }
         else
         {
@@ -2490,6 +2963,10 @@ public class MobileHUDManager
 
         AddRelationshipSummary(selectedNPC);
 
+        AddCompanionRecruitmentButton(
+            selectedNPC
+        );
+
         if (selectedNPC.CanReceiveGifts &&
             selectedNPC.CanGainFriendship)
         {
@@ -2538,6 +3015,94 @@ public class MobileHUDManager
         AddButton(
             "Voltar para cidade",
             () => ShowScreen(UIScreenType.City)
+        );
+    }
+
+    private void AddCompanionRecruitmentButton(
+        NPCData npc)
+    {
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        CompanionData companion =
+            companionManager.GetCompanionByNPCId(
+                npc.ID
+            );
+
+        if (companion == null ||
+            !companion.CanJoinParty)
+        {
+            return;
+        }
+
+        bool isRecruited =
+            companionManager.IsCompanionRecruited(
+                companion.ID
+            );
+
+        if (isRecruited)
+        {
+            AddCard(
+                "Companheiro",
+                companionManager.IsCompanionInParty(
+                    companion.ID)
+                    ? "Este companheiro esta no grupo."
+                    : "Este companheiro esta recrutado na guilda."
+            );
+
+            if (!companionManager.IsCompanionInParty(
+                companion.ID))
+            {
+                AddButton(
+                    "Adicionar ao grupo",
+                    () =>
+                    {
+                        companionManager.AddToParty(
+                            companion.ID
+                        );
+
+                        ShowScreen(
+                            UIScreenType.NPCInteraction
+                        );
+                    }
+                );
+            }
+
+            return;
+        }
+
+        bool meetsRequirements =
+            RequirementChecker.AreRequirementsMet(
+                companion.RecruitmentRequirements,
+                npc.ID
+            );
+
+        AddButton(
+            meetsRequirements
+                ? "Recrutar para a guilda"
+                : "Recrutar (bloqueado)",
+            () =>
+            {
+                if (!meetsRequirements)
+                {
+                    GameFeedbackUI.ShowNotification(
+                        "Requisitos de recrutamento nao cumpridos."
+                    );
+                    return;
+                }
+
+                companionManager.RecruitCompanion(
+                    companion.ID,
+                    addToActiveParty: false
+                );
+
+                ShowScreen(
+                    UIScreenType.NPCInteraction
+                );
+            },
+            meetsRequirements
+                ? new Color(0.22f, 0.18f, 0.12f, 1f)
+                : new Color(0.1f, 0.1f, 0.1f, 1f)
         );
     }
 
@@ -2949,6 +3514,8 @@ public class MobileHUDManager
                 (currentScreen == UIScreenType.Inventory &&
                     pair.Key == UIScreenType.Character) ||
                 (currentScreen == UIScreenType.Equipment &&
+                    pair.Key == UIScreenType.Character) ||
+                (currentScreen == UIScreenType.Party &&
                     pair.Key == UIScreenType.Character) ||
                 (currentScreen == UIScreenType.NPCInteraction &&
                     pair.Key == UIScreenType.City) ||
@@ -3607,6 +4174,12 @@ public class MobileHUDManager
         CombatantRuntimeData enemy =
             combat.GetFirstAliveEnemy();
 
+        List<CombatantRuntimeData> playerSide =
+            combat.GetPlayerSideCombatants();
+
+        List<CombatantRuntimeData> enemies =
+            combat.GetLivingEnemies();
+
         AddCombatPopupText(
             GetCombatPhaseLabel(state.Phase),
             36f,
@@ -3645,14 +4218,75 @@ public class MobileHUDManager
             AddCombatSkillProgress(player);
         }
 
+        if (playerSide.Count > 1)
+        {
+            string partyBody =
+                string.Empty;
+
+            foreach (CombatantRuntimeData ally
+                in playerSide)
+            {
+                if (ally == null ||
+                    ally.Type == CombatantType.Player)
+                {
+                    continue;
+                }
+
+                partyBody +=
+                    $"{ally.DisplayName}: " +
+                    $"{ally.Stats.CurrentHealth}/{ally.Stats.MaxHealth} HP";
+
+                if (ally.IsDefeated)
+                {
+                    partyBody += " (derrotado)";
+                }
+
+                partyBody += "\n";
+            }
+
+            if (!string.IsNullOrEmpty(partyBody))
+            {
+                AddCombatPopupCard(
+                    "Companheiros",
+                    partyBody.TrimEnd(),
+                    104f
+                );
+            }
+
+            foreach (CombatantRuntimeData ally
+                in playerSide)
+            {
+                if (ally == null ||
+                    ally.Type != CombatantType.Ally)
+                {
+                    continue;
+                }
+
+                AddCombatSkillProgress(ally);
+            }
+        }
+
         if (enemy != null)
         {
+            string enemyBody =
+                string.Empty;
+
+            foreach (CombatantRuntimeData enemyEntry
+                in enemies)
+            {
+                enemyBody +=
+                    $"{enemyEntry.DisplayName}: " +
+                    $"{BuildPopupBar(enemyEntry.Stats.CurrentHealth, enemyEntry.Stats.MaxHealth)} " +
+                    $"{enemyEntry.Stats.CurrentHealth}/{enemyEntry.Stats.MaxHealth}\n";
+            }
+
+            enemyBody +=
+                $"Ataque atual {BuildPopupBar(enemy.BasicAttackTimer, enemy.BasicAttackInterval)}\n" +
+                $"Elemento: {GetElementLabel(enemy.Stats.PrimaryElement)}";
+
             AddCombatPopupCard(
-                enemy.DisplayName,
-                $"Vida {BuildPopupBar(enemy.Stats.CurrentHealth, enemy.Stats.MaxHealth)} " +
-                $"{enemy.Stats.CurrentHealth}/{enemy.Stats.MaxHealth}\n" +
-                $"Ataque {BuildPopupBar(enemy.BasicAttackTimer, enemy.BasicAttackInterval)}\n" +
-                $"Elemento: {GetElementLabel(enemy.Stats.PrimaryElement)}"
+                "Inimigos",
+                enemyBody
             );
         }
         else
@@ -3664,6 +4298,16 @@ public class MobileHUDManager
         }
 
         AddCombatLog(state);
+
+        if (state.Phase == CombatPhase.Victory &&
+            !string.IsNullOrEmpty(state.VictorySummary))
+        {
+            AddCombatPopupCard(
+                "Resumo da vitoria",
+                state.VictorySummary,
+                168f
+            );
+        }
 
         if (state.Phase == CombatPhase.Running)
         {
@@ -3745,8 +4389,13 @@ public class MobileHUDManager
         if (string.IsNullOrEmpty(body))
             return;
 
+        string title =
+            player.Type == CombatantType.Ally
+                ? $"Habilidades - {player.DisplayName}"
+                : "Habilidades automaticas";
+
         AddCombatPopupCard(
-            "Habilidades automaticas",
+            title,
             body.TrimEnd(),
             132f
         );
@@ -4641,6 +5290,52 @@ public class MobileHUDManager
 
             _ => elementType.ToString()
         };
+    }
+
+    private string GetCompanionRaceLabel(
+        CompanionData companionData)
+    {
+        if (companionData == null)
+            return "Indefinida";
+
+        RaceData race =
+            companionData.Race != null
+                ? companionData.Race
+                : DatabaseManager.Instance != null
+                    ? DatabaseManager
+                        .Instance
+                        .GetData<RaceData>(
+                            companionData.RaceID
+                        )
+                    : null;
+
+        return race != null &&
+            !string.IsNullOrEmpty(race.DisplayName)
+                ? race.DisplayName
+                : companionData.RaceID;
+    }
+
+    private string GetCompanionArchetypeLabel(
+        CompanionData companionData)
+    {
+        if (companionData == null)
+            return "Indefinido";
+
+        StartingArchetypeData archetype =
+            companionData.Archetype != null
+                ? companionData.Archetype
+                : DatabaseManager.Instance != null
+                    ? DatabaseManager
+                        .Instance
+                        .GetData<StartingArchetypeData>(
+                            companionData.ArchetypeID
+                        )
+                    : null;
+
+        return archetype != null &&
+            !string.IsNullOrEmpty(archetype.DisplayName)
+                ? archetype.DisplayName
+                : companionData.ArchetypeID;
     }
 
     private string GetCombatTurnLabel(

@@ -1,9 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CharacterManager
     : PersistentSingleton<
         CharacterManager>
 {
+    private const int AttributePointsPerLevel = 2;
+
+    public static CharacterManager GetOrCreate()
+    {
+        if (Instance != null)
+            return Instance;
+
+        GameObject characterObject =
+            new GameObject(
+                "CharacterManager"
+            );
+
+        return characterObject
+            .AddComponent<CharacterManager>();
+    }
+
     private PlayerStatsData Stats =>
         SaveManager
         .Instance
@@ -209,7 +226,186 @@ public class CharacterManager
                 Mathf.Max(0, amount),
                 0,
                 MaxStamina
+        );
+    }
+
+    public int GetExperienceToNextLevel()
+    {
+        Stats.EnsureRuntimeDefaults();
+        return Stats.ExperienceToNextLevel;
+    }
+
+    public float GetExperienceProgressPercent()
+    {
+        Stats.EnsureRuntimeDefaults();
+
+        if (Stats.ExperienceToNextLevel <= 0)
+            return 0f;
+
+        return Mathf.Clamp01(
+            (float)Stats.Experience /
+            Stats.ExperienceToNextLevel
+        );
+    }
+
+    public bool SpendAttributePoint(
+        StatType statType)
+    {
+        Stats.EnsureRuntimeDefaults();
+
+        if (Stats.UnspentAttributePoints <= 0)
+        {
+            GameFeedbackUI.ShowNotification(
+                "Nenhum ponto de atributo disponivel."
             );
+
+            return false;
+        }
+
+        Stats.AddStat(
+            statType,
+            1
+        );
+
+        Stats.UnspentAttributePoints--;
+
+        ClampVitalsToCurrentMaximum();
+
+        SaveManager.Instance.SaveGame();
+
+        GameFeedbackUI.ShowNotification(
+            $"Atributo aumentado: {statType}"
+        );
+
+        Debug.Log(
+            $"Stat changed: {statType} -> {Stats.GetStat(statType)}"
+        );
+
+        return true;
+    }
+
+    public bool HasSkill(
+        string skillID)
+    {
+        List<string> knownSkills =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player
+                .KnownSkillIDs;
+
+        return !string.IsNullOrEmpty(skillID) &&
+            knownSkills != null &&
+            knownSkills.Contains(skillID);
+    }
+
+    public bool LearnSkill(
+        string skillID)
+    {
+        if (string.IsNullOrEmpty(skillID) ||
+            HasSkill(skillID))
+        {
+            return false;
+        }
+
+        PlayerData player =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player;
+
+        player.KnownSkillIDs.Add(skillID);
+
+        player.AutoCombat
+            ?.SetSkillEnabled(
+                skillID,
+                true
+            );
+
+        SkillData skill =
+            DatabaseManager.Instance != null
+                ? DatabaseManager
+                    .Instance
+                    .GetData<SkillData>(skillID)
+                : null;
+
+        string skillName =
+            skill != null &&
+            !string.IsNullOrEmpty(skill.DisplayName)
+                ? skill.DisplayName
+                : skillID;
+
+        GameFeedbackUI.ShowNotification(
+            $"Nova habilidade aprendida: {skillName}."
+        );
+
+        Debug.Log(
+            $"Skill learned: {skillID}"
+        );
+
+        return true;
+    }
+
+    public List<string> CheckSkillUnlocks()
+    {
+        List<string> learnedSkills =
+            new();
+
+        if (DatabaseManager.Instance == null)
+            return learnedSkills;
+
+        SaveData save =
+            SaveManager.Instance.CurrentSave;
+
+        List<SkillData> skills =
+            DatabaseManager
+                .Instance
+                .GetAllData<SkillData>();
+
+        foreach (SkillData skill in skills)
+        {
+            if (skill == null ||
+                string.IsNullOrEmpty(skill.ID) ||
+                HasSkill(skill.ID))
+            {
+                continue;
+            }
+
+            if (Stats.Level <
+                Mathf.Max(1, skill.RequiredLevel))
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(skill.ArchetypeID) &&
+                skill.ArchetypeID != save.Player.ArchetypeID)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrEmpty(skill.RaceID) &&
+                skill.RaceID != save.Player.RaceID)
+            {
+                continue;
+            }
+
+            if (!RequirementChecker.AreRequirementsMet(
+                skill.UnlockRequirements))
+            {
+                continue;
+            }
+
+            if (LearnSkill(skill.ID))
+            {
+                learnedSkills.Add(
+                    !string.IsNullOrEmpty(skill.DisplayName)
+                        ? skill.DisplayName
+                        : skill.ID
+                );
+            }
+        }
+
+        return learnedSkills;
     }
 
     public void RestoreVitals()
@@ -227,38 +423,106 @@ public class CharacterManager
         );
     }
 
-    public void GainExperience(
+    public CharacterProgressionResult AddExperience(
         int amount)
     {
+        CharacterProgressionResult result =
+            new CharacterProgressionResult
+            {
+                ExperienceGained = Mathf.Max(0, amount),
+                StartingLevel = Stats.Level,
+                FinalLevel = Stats.Level
+            };
+
+        if (amount <= 0)
+            return result;
+
+        Stats.EnsureRuntimeDefaults();
+
         Stats.Experience +=
-            amount;
+            Mathf.Max(0, amount);
 
         Debug.Log(
             $"+{amount} XP"
         );
 
-        CheckLevelUp();
-    }
+        ApplyLevelUps(result);
 
-    private void CheckLevelUp()
-    {
-        int neededXP =
-            Stats.Level * 100;
+        List<string> learnedSkills =
+            CheckSkillUnlocks();
 
-        if (Stats.Experience
-            < neededXP)
+        if (learnedSkills.Count > 0)
         {
-            return;
+            result.LearnedSkillSummary =
+                string.Join(
+                    ", ",
+                    learnedSkills
+                );
         }
 
-        Stats.Experience -=
-            neededXP;
+        SaveManager
+            .Instance
+            .CurrentSave
+            .Player
+            .EnsureRuntimeDefaults();
 
-        Stats.Level++;
+        return result;
+    }
 
-        Debug.Log(
-            $"LEVEL UP: " +
-            $"{Stats.Level}"
-        );
+    public CharacterProgressionResult GainExperience(
+        int amount)
+    {
+        return AddExperience(amount);
+    }
+
+    private void ApplyLevelUps(
+        CharacterProgressionResult result)
+    {
+        Stats.EnsureRuntimeDefaults();
+
+        while (Stats.Experience >=
+            Stats.ExperienceToNextLevel)
+        {
+            Stats.Experience -=
+                Stats.ExperienceToNextLevel;
+
+            Stats.Level++;
+
+            Stats.UnspentAttributePoints +=
+                AttributePointsPerLevel;
+
+            result.AttributePointsGained +=
+                AttributePointsPerLevel;
+
+            Stats.ExperienceToNextLevel =
+                PlayerStatsData
+                    .GetExperienceRequiredForLevel(
+                        Stats.Level
+                    );
+
+            Stats.CurrentHP =
+                MaxHP;
+
+            Stats.CurrentStamina =
+                MaxStamina;
+
+            Debug.Log(
+                $"LEVEL UP: {Stats.Level}"
+            );
+        }
+
+        result.FinalLevel =
+            Stats.Level;
+
+        if (result.LeveledUp)
+        {
+            GameFeedbackUI.ShowNotification(
+                $"Nivel aumentado! Voce chegou ao nivel {Stats.Level}."
+            );
+
+            GameFeedbackUI.ShowNotification(
+                $"Voce recebeu {result.AttributePointsGained} pontos de atributo."
+            );
+        }
     }
 }

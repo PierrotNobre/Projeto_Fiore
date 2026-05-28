@@ -17,11 +17,14 @@ MonoBehaviour:
   Description: Criatura simples usada como placeholder para encontros perigosos.
   Sprite: {fileID: 0}
   PrimaryElement: 0
+  Level: 1
   MaxHealth: 30
-  Attack: 6
-  Defense: 2
-  Speed: 4
+  Attack: 5
+  Defense: 1
+  Speed: 3
+  ExperienceReward: 25
   Reward:
+    Experience: 0
     Coins: 0
     Items: []
     GuildReputation: 0

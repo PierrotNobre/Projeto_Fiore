@@ -44,6 +44,8 @@ public class DatabaseManager
 
         AddCollection(database.GuildTasks);
 
+        AddCollection(database.Companions);
+
         AddCollection(database.Enemies);
 
         AddCollection(database.CombatEncounters);
@@ -150,5 +152,21 @@ public class DatabaseManager
         string npcId)
     {
         return GetNPCById(npcId) != null;
+    }
+
+    public CompanionData GetCompanionById(
+        string companionId)
+    {
+        return GetData<CompanionData>(
+            companionId
+        );
+    }
+
+    public bool HasCompanion(
+        string companionId)
+    {
+        return GetCompanionById(
+            companionId
+        ) != null;
     }
 }

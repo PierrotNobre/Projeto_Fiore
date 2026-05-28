@@ -21,10 +21,42 @@ public class PlayerStatsData
 
     public int Experience = 0;
 
+    public int ExperienceToNextLevel = 100;
+
+    public int UnspentAttributePoints;
+
     [Header("Resources")]
     public int CurrentHP = 100;
 
     public int CurrentStamina = 100;
+
+    public void EnsureRuntimeDefaults()
+    {
+        if (Level <= 0)
+        {
+            Level = 1;
+        }
+
+        if (Experience < 0)
+        {
+            Experience = 0;
+        }
+
+        ExperienceToNextLevel =
+            GetExperienceRequiredForLevel(Level);
+
+        if (UnspentAttributePoints < 0)
+        {
+            UnspentAttributePoints = 0;
+        }
+    }
+
+    public static int GetExperienceRequiredForLevel(
+        int level)
+    {
+        return 100 +
+            (Math.Max(1, level) - 1) * 50;
+    }
 
     public int GetStat(
         StatType type)

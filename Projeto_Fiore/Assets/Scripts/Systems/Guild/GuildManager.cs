@@ -138,6 +138,13 @@ public class GuildManager
 
         Guild.FixedPartyMemberIDs.Remove(npcID);
 
+        if (CompanionManager.GetOrCreate().IsCompanionInParty(npcID))
+        {
+            CompanionManager
+                .GetOrCreate()
+                .RemoveFromParty(npcID);
+        }
+
         SaveManager.Instance.SaveGame();
 
         return true;
@@ -322,7 +329,10 @@ public class GuildManager
 
         if (!member.IsAvailableForGuildTasks ||
             !member.IsAvailableForTasks ||
-            !string.IsNullOrEmpty(member.CurrentTaskID))
+            !string.IsNullOrEmpty(member.CurrentTaskID) ||
+            CompanionManager
+                .GetOrCreate()
+                .IsCompanionInParty(member.MemberID))
         {
             GameFeedbackUI.ShowNotification(
                 "Membro indisponivel para tarefas."
@@ -356,6 +366,13 @@ public class GuildManager
 
         member.IsAvailableForTasks =
             false;
+
+        CompanionManager
+            .GetOrCreate()
+            .MarkGuildTaskStarted(
+                member.MemberID,
+                task.ID
+            );
 
         TimeData time =
             TimeManager.Instance != null
@@ -479,6 +496,12 @@ public class GuildManager
 
         member.IsAvailableForTasks =
             true;
+
+        CompanionManager
+            .GetOrCreate()
+            .MarkGuildTaskCompleted(
+                member.MemberID
+            );
 
         GameFeedbackUI.ShowGuildUpdated(
             $"Tarefa concluida: {taskName}"

@@ -153,6 +153,21 @@ public static class RequirementChecker
 
             case RequirementType.HasEquipmentSlotFilled:
                 return CheckEquipmentSlotFilled(requirement);
+
+            case RequirementType.PlayerLevel:
+                return CheckPlayerLevel(requirement);
+
+            case RequirementType.LearnedSkill:
+                return CheckLearnedSkill(requirement);
+
+            case RequirementType.UnspentAttributePoints:
+                return CheckUnspentAttributePoints(requirement);
+
+            case RequirementType.IsCompanionRecruited:
+                return CheckCompanionRecruited(requirement);
+
+            case RequirementType.IsCompanionInParty:
+                return CheckCompanionInParty(requirement);
         }
 
         return true;
@@ -650,6 +665,115 @@ public static class RequirementChecker
         LogFailure(
             passed,
             $"Requirement failed: equipment slot empty {requirement.RequiredEquipmentSlot}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckPlayerLevel(
+        RequirementData requirement)
+    {
+        int level =
+            SaveManager.Instance != null &&
+            SaveManager.Instance.CurrentSave != null
+                ? SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Stats
+                    .Level
+                : 1;
+
+        bool passed =
+            level >= requirement.RequiredValue;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: player level {level}/{requirement.RequiredValue}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckLearnedSkill(
+        RequirementData requirement)
+    {
+        bool passed =
+            CharacterManager.Instance != null &&
+            CharacterManager
+                .Instance
+                .HasSkill(
+                    requirement.RequiredSkillID
+                );
+
+        LogFailure(
+            passed,
+            $"Requirement failed: learned skill {requirement.RequiredSkillID}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckUnspentAttributePoints(
+        RequirementData requirement)
+    {
+        int points =
+            SaveManager.Instance != null &&
+            SaveManager.Instance.CurrentSave != null
+                ? SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Stats
+                    .UnspentAttributePoints
+                : 0;
+
+        bool passed =
+            points >= requirement.RequiredValue;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: attribute points {points}/{requirement.RequiredValue}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckCompanionRecruited(
+        RequirementData requirement)
+    {
+        bool current =
+            CompanionManager
+                .GetOrCreate()
+                .IsCompanionRecruited(
+                    requirement.RequiredCompanionID
+                );
+
+        bool passed =
+            current == requirement.RequiredBool;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: companion recruited {requirement.RequiredCompanionID} is {current}, expected {requirement.RequiredBool}"
+        );
+
+        return passed;
+    }
+
+    private static bool CheckCompanionInParty(
+        RequirementData requirement)
+    {
+        bool current =
+            CompanionManager
+                .GetOrCreate()
+                .IsCompanionInParty(
+                    requirement.RequiredCompanionID
+                );
+
+        bool passed =
+            current == requirement.RequiredBool;
+
+        LogFailure(
+            passed,
+            $"Requirement failed: companion in party {requirement.RequiredCompanionID} is {current}, expected {requirement.RequiredBool}"
         );
 
         return passed;

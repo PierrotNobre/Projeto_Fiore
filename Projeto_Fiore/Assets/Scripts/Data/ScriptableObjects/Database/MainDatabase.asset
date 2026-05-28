@@ -48,8 +48,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f35867e0c9f244b3b5144315bce003d7, type: 2}
   - {fileID: 11400000, guid: d404e7c2fb284ce1b3cfe7dfd690a534, type: 2}
   - {fileID: 11400000, guid: a2a2c6e28e964ef69c0bff4b761ac601, type: 2}
+  - {fileID: 11400000, guid: 8a4e56f5d90844da863a6ddcd3970f85, type: 2}
   GuildTasks:
   - {fileID: 11400000, guid: e1ce7c6d53034bfe9a3fca1f1a4a2771, type: 2}
+  Companions:
+  - {fileID: 11400000, guid: 6a8ca85c8cbf4f119f7cf1e70d3f836a, type: 2}
   Enemies:
   - {fileID: 11400000, guid: 99a09084e78546afae8d750ed84f4d39, type: 2}
   CombatEncounters:
@@ -57,6 +60,8 @@ MonoBehaviour:
   Skills:
   - {fileID: 11400000, guid: f116ca18d38448048fca79338deaf1f9, type: 2}
   - {fileID: 11400000, guid: afac5a17cf0f4fe490dd0c8a9e70fb4d, type: 2}
+  - {fileID: 11400000, guid: 71ee3c2dfb8e4bda844f63b04ae63fc2, type: 2}
+  - {fileID: 11400000, guid: bbf61883807b4b2087fe10e205247c55, type: 2}
   Items:
   - {fileID: 11400000, guid: 2f84a569260c046409800d702dc4b6c1, type: 2}
   - {fileID: 11400000, guid: dd1a0d9dc9c640009dc6062bad209d31, type: 2}
@@ -75,9 +80,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cbd0b677ccb84e87a02740c0ae798bf1, type: 2}
   - {fileID: 11400000, guid: 44a9a1fd3f514c1096a674c8c9e697f2, type: 2}
   - {fileID: 11400000, guid: 7149d767cdd04b09b37e8a706b10775a, type: 2}
+  - {fileID: 11400000, guid: 9770d7f151544f31a88f9071d52bda62, type: 2}
   NPCs:
   - {fileID: 11400000, guid: ccdaf24a86edb26488c42f877eb96e9f, type: 2}
   - {fileID: 11400000, guid: f1a6b2452f2244d1be10b2857f1225ef, type: 2}
   - {fileID: 11400000, guid: d24c9b85e43a4065ba98c48435981114, type: 2}
   - {fileID: 11400000, guid: 00512e50cd424625aa99a2af94cf5fbb, type: 2}
   - {fileID: 11400000, guid: 789df2f12fe24581998ae32b86bc5f2c, type: 2}
+  - {fileID: 11400000, guid: d9f61c80e4c94f36aa17ff0f90a9a034, type: 2}

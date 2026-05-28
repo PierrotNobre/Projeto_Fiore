@@ -20,6 +20,7 @@ MonoBehaviour:
     Level: 1
     Quantity: 1
   VictoryReward:
+    Experience: 5
     Coins: 10
     Items:
     - ItemID: rough_stone

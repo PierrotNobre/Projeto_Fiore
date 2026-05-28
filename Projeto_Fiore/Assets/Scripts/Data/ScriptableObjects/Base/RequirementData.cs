@@ -60,4 +60,8 @@ public class RequirementData
 
     public EquipmentSlot RequiredEquipmentSlot =
         EquipmentSlot.MainHand;
+
+    public string RequiredSkillID;
+
+    public string RequiredCompanionID;
 }

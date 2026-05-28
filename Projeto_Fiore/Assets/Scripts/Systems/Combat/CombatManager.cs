@@ -112,6 +112,8 @@ public class CombatManager
             BuildPlayerCombatant()
         );
 
+        AddActiveCompanionCombatants();
+
         int index = 1;
 
         foreach (EnemyEncounterEntry entry
@@ -212,6 +214,42 @@ public class CombatManager
                     combatant != null &&
                     combatant.Type == CombatantType.Player
             );
+    }
+
+    public List<CombatantRuntimeData> GetPlayerSideCombatants()
+    {
+        return State.Combatants
+            .Where(combatant =>
+                combatant != null &&
+                IsPlayerSide(combatant))
+            .ToList();
+    }
+
+    public List<CombatantRuntimeData> GetAlivePlayerSideCombatants()
+    {
+        return State.Combatants
+            .Where(combatant =>
+                combatant != null &&
+                IsPlayerSide(combatant) &&
+                !combatant.IsDefeated)
+            .ToList();
+    }
+
+    public CombatantRuntimeData GetRandomAlivePlayerSideTarget()
+    {
+        List<CombatantRuntimeData> targets =
+            GetAlivePlayerSideCombatants();
+
+        if (targets.Count == 0)
+            return null;
+
+        int index =
+            Random.Range(
+                0,
+                targets.Count
+            );
+
+        return targets[index];
     }
 
     public IReadOnlyList<string> GetCombatLogs()
@@ -407,10 +445,46 @@ public class CombatManager
 
         if (encounter != null)
         {
-            RewardManager.ApplyReward(
+            int enemyExperience =
+                GetEnemyExperienceReward();
+
+            CharacterProgressionResult enemyProgression =
+                enemyExperience > 0
+                    ? CharacterManager
+                        .GetOrCreate()
+                        .AddExperience(enemyExperience)
+                    : null;
+
+            CharacterProgressionResult encounterProgression =
+                RewardManager.ApplyReward(
                 encounter.VictoryReward,
                 encounter.ID
             );
+
+            int encounterExperience =
+                encounter.VictoryReward != null
+                    ? Mathf.Max(
+                        0,
+                        encounter.VictoryReward.Experience
+                    )
+                    : 0;
+
+            string companionProgressionSummary =
+                CompanionManager
+                    .GetOrCreate()
+                    .AddExperienceToActiveCompanions(
+                        enemyExperience +
+                        encounterExperience
+                    );
+
+            State.VictorySummary =
+                BuildVictorySummary(
+                    encounter,
+                    enemyExperience,
+                    enemyProgression,
+                    encounterProgression,
+                    companionProgressionSummary
+                );
 
             if (!string.IsNullOrEmpty(
                 encounter.VictoryEventID))
@@ -553,9 +627,19 @@ public class CombatManager
         CombatantRuntimeData combatant)
     {
         if (combatant == null ||
-            combatant.Type != CombatantType.Enemy)
+            (combatant.Type != CombatantType.Enemy &&
+                combatant.Type != CombatantType.Ally))
         {
             return null;
+        }
+
+        if (combatant.Type == CombatantType.Ally)
+        {
+            return CompanionManager
+                .GetOrCreate()
+                .GetCompanionPortrait(
+                    combatant.SourceDataID
+                );
         }
 
         EnemyData enemy =
@@ -627,7 +711,7 @@ public class CombatManager
                 continue;
             }
 
-            if (combatant.Type == CombatantType.Player)
+            if (IsPlayerSide(combatant))
             {
                 if (TryExecutePlayerAutoAction(combatant))
                     return;
@@ -863,11 +947,10 @@ public class CombatManager
             return false;
         }
 
-        CombatantRuntimeData player =
-            GetPlayerCombatant();
+        CombatantRuntimeData target =
+            GetRandomAlivePlayerSideTarget();
 
-        if (player == null ||
-            player.IsDefeated)
+        if (target == null)
         {
             return false;
         }
@@ -882,17 +965,17 @@ public class CombatManager
         int damage =
             CalculateDamage(
                 enemy.Stats.PhysicalAttack,
-                player,
+                target,
                 enemy.Stats.PrimaryElement
             );
 
         ApplyDamage(
-            player,
+            target,
             damage
         );
 
         AddLog(
-            $"{enemy.DisplayName} atacou causando {damage} de dano."
+            $"{enemy.DisplayName} atacou {target.DisplayName} causando {damage} de dano."
         );
 
         MarkActionDelay();
@@ -915,20 +998,16 @@ public class CombatManager
             return false;
         }
 
-        EquipmentManager equipment =
-            EquipmentManager.GetOrCreate();
-
         if (offHand &&
-            !equipment.CanUseOffHandAttack())
+            !player.CanUseOffHandAttack)
         {
             return false;
         }
 
         ItemData weapon =
-            equipment.GetEquippedItemData(
+            GetCombatantWeapon(
+                player,
                 offHand
-                    ? EquipmentSlot.OffHand
-                    : EquipmentSlot.MainHand
             );
 
         int attack =
@@ -965,8 +1044,8 @@ public class CombatManager
 
         AddLog(
             offHand
-                ? $"Ataque secundario causou {damage} de dano em {target.DisplayName}."
-                : $"Ataque principal causou {damage} de dano em {target.DisplayName}."
+                ? $"{player.DisplayName} fez ataque secundario em {target.DisplayName} causando {damage} de dano."
+                : $"{player.DisplayName} atacou {target.DisplayName} causando {damage} de dano."
         );
 
         MarkActionDelay();
@@ -990,22 +1069,9 @@ public class CombatManager
             return false;
         }
 
-        List<string> knownSkillIDs =
-            SaveManager
-                .Instance
-                .CurrentSave
-                .Player
-                .KnownSkillIDs;
-
-        if (knownSkillIDs == null ||
-            !knownSkillIDs.Contains(skill.ID))
-        {
-            return false;
-        }
-
-        if (!RequirementChecker
-            .AreRequirementsMet(
-                skill.Requirements))
+        if (!CombatantCanUseSkill(
+            player,
+            skill))
         {
             return false;
         }
@@ -1046,12 +1112,9 @@ public class CombatManager
             damage
         );
 
-        SaveManager
-            .Instance
-            .CurrentSave
-            .Stats
-            .CurrentStamina =
-            player.Stats.CurrentEnergy;
+        SyncCombatantVitals(
+            player
+        );
 
         QuestManager
             .Instance
@@ -1164,6 +1227,8 @@ public class CombatManager
         EquipmentManager equipment =
             EquipmentManager.GetOrCreate();
 
+        save.Player.EnsureRuntimeDefaults();
+
         CombatantRuntimeData combatant =
             new CombatantRuntimeData
             {
@@ -1178,7 +1243,8 @@ public class CombatManager
                     CalculateBasicAttackInterval(stats.Speed) *
                     offHandIntervalMultiplier,
                 CanUseOffHandAttack =
-                    equipment.CanUseOffHandAttack()
+                    equipment.CanUseOffHandAttack() &&
+                    save.Player.AutoCombat.AllowOffHandAttack
             };
 
         combatant.BasicAttackTimer =
@@ -1188,6 +1254,83 @@ public class CombatManager
             combatant.OffHandAttackInterval * 0.15f;
 
         AddPlayerSkillRuntimes(combatant);
+
+        return combatant;
+    }
+
+    private void AddActiveCompanionCombatants()
+    {
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        int index = 1;
+
+        foreach (CompanionState companionState
+            in companionManager.GetActivePartyCompanions())
+        {
+            if (companionState == null ||
+                companionState.IsUnavailable)
+            {
+                continue;
+            }
+
+            State.Combatants.Add(
+                BuildCompanionCombatant(
+                    companionState,
+                    index
+                )
+            );
+
+            index++;
+        }
+    }
+
+    private CombatantRuntimeData BuildCompanionCombatant(
+        CompanionState companionState,
+        int index)
+    {
+        CompanionManager companionManager =
+            CompanionManager.GetOrCreate();
+
+        CombatStats stats =
+            companionManager.BuildCombatStats(
+                companionState
+            );
+
+        CombatantRuntimeData combatant =
+            new CombatantRuntimeData
+            {
+                CombatantID =
+                    $"{companionState.CompanionID}_{index}",
+                DisplayName =
+                    companionManager.GetCompanionDisplayName(
+                        companionState.CompanionID
+                    ),
+                Type = CombatantType.Ally,
+                SourceDataID =
+                    companionState.CompanionID,
+                Stats = stats,
+                BasicAttackInterval =
+                    CalculateBasicAttackInterval(stats.Speed),
+                OffHandAttackInterval =
+                    CalculateBasicAttackInterval(stats.Speed) *
+                    offHandIntervalMultiplier,
+                CanUseOffHandAttack =
+                    companionManager.CanUseOffHandAttack(
+                        companionState
+                    )
+            };
+
+        combatant.BasicAttackTimer =
+            combatant.BasicAttackInterval * 0.3f;
+
+        combatant.OffHandAttackTimer =
+            combatant.OffHandAttackInterval * 0.2f;
+
+        AddCompanionSkillRuntimes(
+            combatant,
+            companionState
+        );
 
         return combatant;
     }
@@ -1248,6 +1391,19 @@ public class CombatManager
                 .Player
                 .KnownSkillIDs;
 
+        AutoCombatSettings autoCombat =
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Player
+                .AutoCombat;
+
+        if (autoCombat == null ||
+            !autoCombat.AllowAutoSkills)
+        {
+            return;
+        }
+
         if (skillIDs == null)
             return;
 
@@ -1261,7 +1417,66 @@ public class CombatManager
                     );
 
             if (skill == null ||
-                !skill.AutoUseInCombat)
+                !skill.AutoUseInCombat ||
+                !autoCombat.IsSkillEnabled(skill.ID) ||
+                SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Stats
+                    .Level <
+                    Mathf.Max(1, skill.RequiredLevel))
+            {
+                continue;
+            }
+
+            combatant.SkillRuntimes.Add(
+                new CombatSkillRuntimeData
+                {
+                    SkillID = skill.ID,
+                    CurrentCharge = 0f,
+                    CooldownRemaining = 0f
+                }
+            );
+        }
+    }
+
+    private void AddCompanionSkillRuntimes(
+        CombatantRuntimeData combatant,
+        CompanionState companionState)
+    {
+        if (combatant == null ||
+            companionState == null)
+        {
+            return;
+        }
+
+        companionState.EnsureRuntimeDefaults();
+
+        AutoCombatSettings autoCombat =
+            companionState.AutoCombatSettings;
+
+        if (autoCombat == null ||
+            !autoCombat.AllowAutoSkills ||
+            companionState.LearnedSkillIDs == null)
+        {
+            return;
+        }
+
+        foreach (string skillID
+            in companionState.LearnedSkillIDs)
+        {
+            SkillData skill =
+                DatabaseManager
+                    .Instance
+                    .GetData<SkillData>(
+                        skillID
+                    );
+
+            if (skill == null ||
+                !skill.AutoUseInCombat ||
+                !autoCombat.IsSkillEnabled(skill.ID) ||
+                companionState.Level <
+                Mathf.Max(1, skill.RequiredLevel))
             {
                 continue;
             }
@@ -1284,6 +1499,14 @@ public class CombatManager
             !resolvingCombatEnd;
     }
 
+    private static bool IsPlayerSide(
+        CombatantRuntimeData combatant)
+    {
+        return combatant != null &&
+            (combatant.Type == CombatantType.Player ||
+                combatant.Type == CombatantType.Ally);
+    }
+
     private CombatantRuntimeData FindCombatant(
         string combatantID)
     {
@@ -1293,6 +1516,144 @@ public class CombatManager
                     combatant != null &&
                     combatant.CombatantID == combatantID
             );
+    }
+
+    private ItemData GetCombatantWeapon(
+        CombatantRuntimeData combatant,
+        bool offHand)
+    {
+        EquipmentSlot slot =
+            offHand
+                ? EquipmentSlot.OffHand
+                : EquipmentSlot.MainHand;
+
+        if (combatant.Type == CombatantType.Player)
+        {
+            return EquipmentManager
+                .GetOrCreate()
+                .GetEquippedItemData(slot);
+        }
+
+        if (combatant.Type == CombatantType.Ally)
+        {
+            CompanionState state =
+                CompanionManager
+                    .GetOrCreate()
+                    .GetCompanionState(
+                        combatant.SourceDataID,
+                        false
+                    );
+
+            return CompanionManager
+                .GetOrCreate()
+                .GetCompanionEquippedItemData(
+                    state,
+                    slot
+                );
+        }
+
+        return null;
+    }
+
+    private bool CombatantCanUseSkill(
+        CombatantRuntimeData combatant,
+        SkillData skill)
+    {
+        if (combatant == null ||
+            skill == null)
+        {
+            return false;
+        }
+
+        if (!RequirementChecker
+            .AreRequirementsMet(
+                skill.Requirements))
+        {
+            return false;
+        }
+
+        if (combatant.Type == CombatantType.Player)
+        {
+            List<string> knownSkillIDs =
+                SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Player
+                    .KnownSkillIDs;
+
+            return knownSkillIDs != null &&
+                knownSkillIDs.Contains(skill.ID) &&
+                SaveManager
+                    .Instance
+                    .CurrentSave
+                    .Stats
+                    .Level >=
+                Mathf.Max(1, skill.RequiredLevel);
+        }
+
+        if (combatant.Type == CombatantType.Ally)
+        {
+            CompanionState state =
+                CompanionManager
+                    .GetOrCreate()
+                    .GetCompanionState(
+                        combatant.SourceDataID,
+                        false
+                    );
+
+            return state != null &&
+                state.LearnedSkillIDs != null &&
+                state.LearnedSkillIDs.Contains(skill.ID) &&
+                state.Level >= Mathf.Max(1, skill.RequiredLevel);
+        }
+
+        return false;
+    }
+
+    private void SyncCombatantVitals(
+        CombatantRuntimeData combatant)
+    {
+        if (combatant == null)
+            return;
+
+        if (combatant.Type == CombatantType.Player)
+        {
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Stats
+                .CurrentHP =
+                combatant.Stats.CurrentHealth;
+
+            SaveManager
+                .Instance
+                .CurrentSave
+                .Stats
+                .CurrentStamina =
+                combatant.Stats.CurrentEnergy;
+
+            return;
+        }
+
+        if (combatant.Type != CombatantType.Ally)
+            return;
+
+        CompanionState state =
+            CompanionManager
+                .GetOrCreate()
+                .GetCompanionState(
+                    combatant.SourceDataID,
+                    false
+                );
+
+        if (state == null)
+            return;
+
+        state.CurrentVitals.CurrentHealth =
+            combatant.Stats.CurrentHealth;
+
+        state.CurrentVitals.CurrentEnergy =
+            combatant.Stats.CurrentEnergy;
     }
 
     private int GetWeaponAttackBonus(
@@ -1358,15 +1719,9 @@ public class CombatManager
                 Mathf.Max(0, damage)
             );
 
-        if (target.Type == CombatantType.Player)
-        {
-            SaveManager
-                .Instance
-                .CurrentSave
-                .Stats
-                .CurrentHP =
-                target.Stats.CurrentHealth;
-        }
+        SyncCombatantVitals(
+            target
+        );
 
         if (target.Stats.CurrentHealth <= 0)
         {
@@ -1382,11 +1737,7 @@ public class CombatManager
         if (resolvingCombatEnd)
             return true;
 
-        CombatantRuntimeData player =
-            GetPlayerCombatant();
-
-        if (player == null ||
-            player.IsDefeated)
+        if (GetAlivePlayerSideCombatants().Count == 0)
         {
             EndCombatDefeat();
             return true;
@@ -1421,6 +1772,142 @@ public class CombatManager
     {
         actionDelayRemaining =
             Mathf.Max(0f, actionVisualDelay);
+    }
+
+    private int GetEnemyExperienceReward()
+    {
+        int total = 0;
+
+        foreach (CombatantRuntimeData combatant
+            in State.Combatants)
+        {
+            if (combatant == null ||
+                combatant.Type != CombatantType.Enemy)
+            {
+                continue;
+            }
+
+            EnemyData enemy =
+                DatabaseManager
+                    .Instance
+                    .GetData<EnemyData>(
+                        combatant.SourceDataID
+                    );
+
+            if (enemy == null)
+                continue;
+
+            total += Mathf.Max(
+                0,
+                enemy.ExperienceReward
+            );
+        }
+
+        return total;
+    }
+
+    private string BuildVictorySummary(
+        CombatEncounterData encounter,
+        int enemyExperience,
+        CharacterProgressionResult enemyProgression,
+        CharacterProgressionResult encounterProgression,
+        string companionProgressionSummary)
+    {
+        List<string> defeatedNames =
+            State
+                .Combatants
+                .Where(combatant =>
+                    combatant != null &&
+                    combatant.Type == CombatantType.Enemy)
+                .Select(combatant =>
+                    combatant.DisplayName)
+                .ToList();
+
+        string summary =
+            defeatedNames.Count > 0
+                ? $"Inimigos derrotados: {string.Join(", ", defeatedNames)}"
+                : "Inimigos derrotados.";
+
+        int rewardExperience =
+            encounter != null &&
+            encounter.VictoryReward != null
+                ? Mathf.Max(
+                    0,
+                    encounter.VictoryReward.Experience
+                )
+                : 0;
+
+        int totalExperience =
+            enemyExperience +
+            rewardExperience;
+
+        if (totalExperience > 0)
+        {
+            summary +=
+                $"\nXP recebido: {totalExperience}";
+        }
+
+        if (encounter != null &&
+            encounter.VictoryReward != null)
+        {
+            string rewardSummary =
+                RewardManager.BuildRewardSummary(
+                    encounter.VictoryReward
+                );
+
+            if (rewardSummary != "Sem recompensa.")
+            {
+                summary +=
+                    $"\n{rewardSummary}";
+            }
+        }
+
+        int levelsGained =
+            (enemyProgression?.LevelsGained ?? 0) +
+            (encounterProgression?.LevelsGained ?? 0);
+
+        int pointsGained =
+            (enemyProgression?.AttributePointsGained ?? 0) +
+            (encounterProgression?.AttributePointsGained ?? 0);
+
+        if (levelsGained > 0)
+        {
+            summary +=
+                $"\nNivel aumentado: {SaveManager.Instance.CurrentSave.Stats.Level}";
+
+            if (pointsGained > 0)
+            {
+                summary +=
+                    $"\nPontos de atributo: +{pointsGained}";
+            }
+        }
+
+        string learnedSkills =
+            string.Join(
+                ", ",
+                new[]
+                {
+                    enemyProgression?.LearnedSkillSummary,
+                    encounterProgression?.LearnedSkillSummary
+                }
+                .Where(text =>
+                    !string.IsNullOrEmpty(text))
+            );
+
+        if (!string.IsNullOrEmpty(learnedSkills))
+        {
+            summary +=
+                $"\nHabilidades aprendidas: {learnedSkills}";
+        }
+
+        if (!string.IsNullOrEmpty(
+            companionProgressionSummary))
+        {
+            summary +=
+                $"\nCompanheiros evoluiram: {companionProgressionSummary}";
+        }
+
+        return summary;
     }
 
     private static string GetElementLabel(

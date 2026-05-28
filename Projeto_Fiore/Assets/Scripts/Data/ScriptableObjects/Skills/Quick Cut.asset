@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce6c11d9ac014c8a85ecf6082d55da2d, type: 3}
-  m_Name: Strong Slash
+  m_Name: Quick Cut
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  ID: strong_slash
-  DisplayName: Golpe Forte
-  Description: Um golpe fisico simples para testes.
+  ID: quick_cut
+  DisplayName: Corte Rapido
+  Description: Um ataque fisico rapido para testes de progressao.
   SkillType: 0
   ElementType: 0
-  EnergyCost: 5
-  Power: 5
-  ChargeTime: 5
+  EnergyCost: 3
+  Power: 3
+  ChargeTime: 3
   CooldownTime: 0
   AutoUseInCombat: 1
-  Priority: 0
-  RequiredLevel: 1
-  LearnedByDefault: 1
+  Priority: 1
+  RequiredLevel: 2
+  LearnedByDefault: 0
   ArchetypeID: archetype_warrior
   RaceID: 
   TargetType: 0

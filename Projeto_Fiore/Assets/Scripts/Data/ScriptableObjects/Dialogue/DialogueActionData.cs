@@ -11,6 +11,12 @@ public class DialogueActionData
 
     public bool BoolValue;
 
+    public string CompanionID;
+
+    public string NPCID;
+
+    public bool AddToActiveParty;
+
     public RewardData Reward = new();
 
     public string NotificationMessage;

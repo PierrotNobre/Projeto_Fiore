@@ -23,5 +23,10 @@ MonoBehaviour:
   CooldownTime: 0
   AutoUseInCombat: 1
   Priority: 0
+  RequiredLevel: 1
+  LearnedByDefault: 1
+  ArchetypeID: archetype_mage
+  RaceID: 
   TargetType: 0
   Requirements: []
+  UnlockRequirements: []

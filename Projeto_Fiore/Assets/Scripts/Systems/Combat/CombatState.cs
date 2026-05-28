@@ -29,6 +29,8 @@ public class CombatState
 
     public string LastLog;
 
+    public string VictorySummary;
+
     public string EncounterDisplayName;
 
     public float ElapsedCombatTime;
@@ -71,6 +73,7 @@ public class CombatState
         CanFlee = true;
         ReturnScreenAfterCombat = UIScreenType.Exploration;
         LastLog = string.Empty;
+        VictorySummary = string.Empty;
         EncounterDisplayName = string.Empty;
         ElapsedCombatTime = 0f;
         CombatSpeedMultiplier = 1f;

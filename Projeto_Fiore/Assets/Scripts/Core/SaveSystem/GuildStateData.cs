@@ -69,11 +69,16 @@ public class GuildStateData
         {
             member?.EnsureRuntimeDefaults();
 
-            if (member != null &&
-                !string.IsNullOrEmpty(member.NPCID) &&
-                !RecruitedMemberIDs.Contains(member.NPCID))
+            string recruitedID =
+                member != null &&
+                !string.IsNullOrEmpty(member.MemberID)
+                    ? member.MemberID
+                    : member?.NPCID;
+
+            if (!string.IsNullOrEmpty(recruitedID) &&
+                !RecruitedMemberIDs.Contains(recruitedID))
             {
-                RecruitedMemberIDs.Add(member.NPCID);
+                RecruitedMemberIDs.Add(recruitedID);
             }
         }
 

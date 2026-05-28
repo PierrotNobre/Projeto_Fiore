@@ -50,6 +50,9 @@ public class ItemData
     public List<ElementModifier> ElementalResistanceModifiers =
         new();
 
+    public List<RequirementData> EquipRequirements =
+        new();
+
     [TextArea]
     public string FlavorText;
 

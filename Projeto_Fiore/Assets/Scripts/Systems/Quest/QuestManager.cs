@@ -860,9 +860,12 @@ public class QuestManager
             return false;
 
         return reward.Coins != 0 ||
+            reward.Experience != 0 ||
             reward.GuildReputation != 0 ||
             (reward.Items != null &&
                 reward.Items.Count > 0) ||
+            (reward.CompanionRewards != null &&
+                reward.CompanionRewards.Count > 0) ||
             (reward.StatRewards != null &&
                 reward.StatRewards.Count > 0);
     }

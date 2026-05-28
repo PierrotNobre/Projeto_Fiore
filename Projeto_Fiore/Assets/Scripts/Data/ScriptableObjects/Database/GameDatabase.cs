@@ -36,6 +36,9 @@ public class GameDatabase
     [Header("Guild")]
     public List<GuildTaskData> GuildTasks;
 
+    [Header("Companions")]
+    public List<CompanionData> Companions;
+
     public List<EnemyData> Enemies;
 
     public List<CombatEncounterData> CombatEncounters;

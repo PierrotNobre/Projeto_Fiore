@@ -12,6 +12,8 @@ public class EnemyData : BaseData
     public ElementType PrimaryElement =
         ElementType.None;
 
+    public int Level = 1;
+
     public int MaxHealth = 10;
 
     public int Attack = 1;
@@ -19,6 +21,8 @@ public class EnemyData : BaseData
     public int Defense = 0;
 
     public int Speed = 4;
+
+    public int ExperienceReward;
 
     public RewardData Reward = new();
 

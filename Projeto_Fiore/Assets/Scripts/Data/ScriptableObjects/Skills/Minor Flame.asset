@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce6c11d9ac014c8a85ecf6082d55da2d, type: 3}
-  m_Name: Strong Slash
+  m_Name: Minor Flame
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  ID: strong_slash
-  DisplayName: Golpe Forte
-  Description: Um golpe fisico simples para testes.
-  SkillType: 0
-  ElementType: 0
-  EnergyCost: 5
-  Power: 5
-  ChargeTime: 5
+  ID: minor_flame
+  DisplayName: Chama Menor
+  Description: Uma habilidade magica de fogo para testes de progressao.
+  SkillType: 1
+  ElementType: 2
+  EnergyCost: 4
+  Power: 4
+  ChargeTime: 4.5
   CooldownTime: 0
   AutoUseInCombat: 1
-  Priority: 0
-  RequiredLevel: 1
-  LearnedByDefault: 1
-  ArchetypeID: archetype_warrior
+  Priority: 1
+  RequiredLevel: 2
+  LearnedByDefault: 0
+  ArchetypeID: archetype_mage
   RaceID: 
   TargetType: 0
   Requirements: []

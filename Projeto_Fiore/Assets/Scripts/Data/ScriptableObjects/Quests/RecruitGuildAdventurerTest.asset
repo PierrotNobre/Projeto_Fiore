@@ -10,42 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 19d1d15bd834f8b45ba820d163c9797d, type: 3}
-  m_Name: GuildDefeatWildBeast
+  m_Name: RecruitGuildAdventurerTest
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
-  ID: guild_defeat_wild_beast
-  DisplayName: Afastar Criatura Selvagem
-  Description: Contrato simples de combate para a Guilda dos Gatos Negros.
+  ID: recruit_guild_adventurer_test
+  DisplayName: Novo Aventureiro da Guilda
+  Description: Ajude a Guilda dos Gatos Negros a receber um novo aventureiro.
   QuestCategory: 2
   RequiredGuildLevel: 1
   Objectives: []
   Steps:
-  - StepID: enter_ravenhold_outskirts
-    Title: Va aos arredores de Ravenhold
-    Description: Explore os arredores de Ravenhold.
-    ObjectiveType: 9
-    TargetID: ravenhold_outskirts
-    RequiredAmount: 1
-    StepReward:
-      Experience: 0
-      Coins: 0
-      Items: []
-      GuildReputation: 0
-      StatRewards: []
-  - StepID: defeat_wild_beast_encounter
-    Title: Vença o encontro
-    Description: Enfrente a criatura selvagem nos arredores.
-    ObjectiveType: 16
-    TargetID: encounter_wild_beast_test
-    RequiredAmount: 1
-    StepReward:
-      Experience: 0
-      Coins: 0
-      Items: []
-      GuildReputation: 0
-      StatRewards: []
-  - StepID: report_to_guild_master
-    Title: Retorne para a guilda
-    Description: Fale com a Mestre da Guilda.
+  - StepID: talk_to_guild_master_start
+    Title: Fale com a Mestre da Guilda
+    Description: Pergunte sobre novos membros para a guilda.
     ObjectiveType: 0
     TargetID: black_cats_guild_master
     RequiredAmount: 1
@@ -54,12 +30,41 @@ MonoBehaviour:
       Coins: 0
       Items: []
       GuildReputation: 0
+      CompanionRewards: []
+      StatRewards: []
+  - StepID: talk_to_adventurer
+    Title: Fale com o Aventureiro da Guilda
+    Description: Converse com o aventureiro presente na guilda.
+    ObjectiveType: 0
+    TargetID: guild_adventurer_placeholder
+    RequiredAmount: 1
+    StepReward:
+      Experience: 0
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      CompanionRewards: []
+      StatRewards: []
+  - StepID: report_to_guild_master
+    Title: Retorne para a Mestre da Guilda
+    Description: Informe que o aventureiro esta pronto para ajudar.
+    ObjectiveType: 0
+    TargetID: black_cats_guild_master
+    RequiredAmount: 1
+    StepReward:
+      Experience: 0
+      Coins: 0
+      Items: []
+      GuildReputation: 0
+      CompanionRewards: []
       StatRewards: []
   Rewards:
-    Experience: 50
-    Coins: 25
+    Experience: 25
+    Coins: 0
     Items: []
-    GuildReputation: 12
+    GuildReputation: 5
+    CompanionRewards:
+    - guild_adventurer_placeholder_companion
     StatRewards: []
   GoldReward: 0
   DeadlineDays: 0

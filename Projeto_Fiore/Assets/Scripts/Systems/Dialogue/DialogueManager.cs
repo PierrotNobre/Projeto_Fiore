@@ -620,6 +620,32 @@ public class DialogueManager
                     );
                 break;
 
+            case DialogueActionType.RecruitCompanion:
+            case DialogueActionType.AddCompanionToGuild:
+                CompanionManager
+                    .GetOrCreate()
+                    .RecruitCompanion(
+                        ResolveActionCompanionID(action),
+                        action.AddToActiveParty
+                    );
+                break;
+
+            case DialogueActionType.AddCompanionToParty:
+                CompanionManager
+                    .GetOrCreate()
+                    .AddToParty(
+                        ResolveActionCompanionID(action)
+                    );
+                break;
+
+            case DialogueActionType.RemoveCompanionFromParty:
+                CompanionManager
+                    .GetOrCreate()
+                    .RemoveFromParty(
+                        ResolveActionCompanionID(action)
+                    );
+                break;
+
             case DialogueActionType.ShowNotification:
                 GameFeedbackUI.ShowNotification(
                     !string.IsNullOrEmpty(action.NotificationMessage)
@@ -641,6 +667,39 @@ public class DialogueManager
 
         return currentNPC != null
             ? currentNPC.ID
+            : null;
+    }
+
+    private string ResolveActionCompanionID(
+        DialogueActionData action)
+    {
+        if (action != null &&
+            !string.IsNullOrEmpty(action.CompanionID))
+        {
+            return action.CompanionID;
+        }
+
+        if (action != null &&
+            !string.IsNullOrEmpty(action.TargetID))
+        {
+            return action.TargetID;
+        }
+
+        string npcID =
+            action != null &&
+            !string.IsNullOrEmpty(action.NPCID)
+                ? action.NPCID
+                : currentNPC != null
+                    ? currentNPC.ID
+                    : null;
+
+        CompanionData companion =
+            CompanionManager
+                .GetOrCreate()
+                .GetCompanionByNPCId(npcID);
+
+        return companion != null
+            ? companion.ID
             : null;
     }
 

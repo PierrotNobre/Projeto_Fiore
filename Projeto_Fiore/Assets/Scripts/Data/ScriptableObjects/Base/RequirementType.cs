@@ -44,5 +44,15 @@ public enum RequirementType
 
     HasEquippedItem,
 
-    HasEquipmentSlotFilled
+    HasEquipmentSlotFilled,
+
+    PlayerLevel,
+
+    LearnedSkill,
+
+    UnspentAttributePoints,
+
+    IsCompanionRecruited,
+
+    IsCompanionInParty
 }

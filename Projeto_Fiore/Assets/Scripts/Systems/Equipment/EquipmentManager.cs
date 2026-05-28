@@ -441,6 +441,16 @@ public class EquipmentManager
         if (!itemData.CanEquipInSlot(targetSlot))
             return false;
 
+        if (!RequirementChecker
+            .AreRequirementsMet(
+                itemData.EquipRequirements))
+        {
+            failureMessage =
+                "Requisitos do equipamento nao cumpridos.";
+
+            return false;
+        }
+
         if (targetSlot == EquipmentSlot.OffHand &&
             IsOffHandBlocked())
         {
