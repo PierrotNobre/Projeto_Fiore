@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 30c9c7c5636afbf478b99a894a142226
+guid: 35b6840d62b646541a4b69cca8debd8f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7022687613848116655
-    second: LocationAsset_0
+      213: 8191027500934258497
+    second: MissionsButton_0
+  - first:
+      213: 8851550614506959945
+    second: MissionsButton_1
+  - first:
+      213: 9185100050189335678
+    second: MissionsButton_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,13 +52,13 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 191, y: 508, z: 219, w: 210}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -113,23 +119,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: LocationAsset_0
+      name: MissionsButton_0
       rect:
         serializedVersion: 2
-        x: 74
-        y: 33
-        width: 939
-        height: 1407
+        x: 73
+        y: 13
+        width: 594
+        height: 696
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1522c00b2d66a8e90800000000000000
-      internalID: -7022687613848116655
+      spriteID: 14f54aa3d106ca170800000000000000
+      internalID: 8191027500934258497
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MissionsButton_1
+      rect:
+        serializedVersion: 2
+        x: 781
+        y: 13
+        width: 602
+        height: 700
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 944f319e26607da70800000000000000
+      internalID: 8851550614506959945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MissionsButton_2
+      rect:
+        serializedVersion: 2
+        x: 1502
+        y: 13
+        width: 596
+        height: 696
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7c35f5b4d7087f70800000000000000
+      internalID: 9185100050189335678
       vertices: []
       indices: 
       edges: []
@@ -138,8 +188,8 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
-    internalID: 1537655665
+    spriteID: 
+    internalID: 0
     vertices: []
     indices: 
     edges: []
@@ -148,7 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      LocationAsset_0: -7022687613848116655
+      MissionsButton_0: 8191027500934258497
+      MissionsButton_1: 8851550614506959945
+      MissionsButton_2: 9185100050189335678
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -82,6 +82,8 @@ public class MobileHUDManager
 
     private bool guildQuestBoardMode;
 
+    private SceneCityHUDController sceneCityHUD;
+
     private UIScreenType currentScreen =
         UIScreenType.City;
 
@@ -175,6 +177,7 @@ public class MobileHUDManager
         if (Instance == null)
             return;
 
+        Instance.HideSceneCityHUD();
         Instance.gameObject.SetActive(false);
     }
 
@@ -320,6 +323,24 @@ public class MobileHUDManager
         return true;
     }
 
+    public static bool OpenCityService(
+        CityServiceType service,
+        CityLocationData location = null)
+    {
+        MobileHUDManager manager =
+            OpenOrCreate();
+
+        if (manager == null)
+            return false;
+
+        manager.OpenCityHUDService(
+            service,
+            location
+        );
+
+        return true;
+    }
+
     public void ShowScreen(
         UIScreenType screenType)
     {
@@ -333,9 +354,65 @@ public class MobileHUDManager
 
     public void RefreshAll()
     {
+        if (TryUseSceneCityHUD())
+        {
+            return;
+        }
+
+        SetRuntimeRootVisible(true);
         UpdateTopHUD();
         BuildBottomNavigation();
         RefreshCurrentScreen();
+    }
+
+    private bool TryUseSceneCityHUD()
+    {
+        if (currentScreen != UIScreenType.City ||
+            SceneManager.GetActiveScene().name !=
+            SceneFlowManager.CitySceneName)
+        {
+            HideSceneCityHUD();
+            return false;
+        }
+
+        sceneCityHUD =
+            SceneCityHUDController.GetOrCreateFromScene();
+
+        if (sceneCityHUD == null)
+            return false;
+
+        SetRuntimeRootVisible(false);
+        sceneCityHUD.ShowAndRefresh();
+
+        return true;
+    }
+
+    private void SetRuntimeRootVisible(
+        bool visible)
+    {
+        if (root == null)
+            return;
+
+        if (root.gameObject.activeSelf != visible)
+        {
+            root.gameObject.SetActive(visible);
+        }
+    }
+
+    private void HideSceneCityHUD()
+    {
+        if (sceneCityHUD == null &&
+            SceneManager.GetActiveScene().name ==
+            SceneFlowManager.CitySceneName)
+        {
+            sceneCityHUD =
+                SceneCityHUDController.GetOrCreateFromScene();
+        }
+
+        if (sceneCityHUD != null)
+        {
+            sceneCityHUD.SetVisible(false);
+        }
     }
 
     private void RefreshCurrentScreen()
@@ -2935,6 +3012,32 @@ public class MobileHUDManager
         }
     }
 
+    private void OpenCityHUDService(
+        CityServiceType service,
+        CityLocationData location)
+    {
+        if (service == CityServiceType.None ||
+            service == CityServiceType.Travel)
+        {
+            GameFeedbackUI.ShowNotification(
+                "Use o Mapa para viagem e exploracao."
+            );
+
+            return;
+        }
+
+        selectedLocation =
+            location;
+
+        if (location != null)
+        {
+            OpenLocationService(service);
+            return;
+        }
+
+        OpenService(service);
+    }
+
     private void BuildNPCInteractionScreen()
     {
         if (selectedNPC == null)
@@ -4101,6 +4204,9 @@ public class MobileHUDManager
 
     private void ShowCombatPopup()
     {
+        HideSceneCityHUD();
+        SetRuntimeRootVisible(true);
+
         if (combatPopupRoot == null)
         {
             BuildCombatPopup();

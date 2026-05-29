@@ -18,7 +18,7 @@ MonoBehaviour:
   Race: {fileID: 11400000, guid: d5ccb36533553824281973c1f9409e3d, type: 2}
   Faction: {fileID: 0}
   Role: 0
-  Portrait: {fileID: 0}
+  Portrait: {fileID: -8406270233009542128, guid: 34bd46d76f729704f96ab3825ecf09a8, type: 3}
   FullBodySprite: {fileID: 0}
   IconSprite: {fileID: 0}
   HomeCity: {fileID: 11400000, guid: e2ee7c61650bd0a4da0ab2c75cc1803b, type: 2}
@@ -29,18 +29,16 @@ MonoBehaviour:
   AvailableFromHour: 8
   AvailableUntilHour: 20
   RelatedService: 7
-  AvailableServices:
-  - 0
-  - 5
+  AvailableServices: 0000000005000000
   ShopData: {fileID: 0}
   IsImportantNPC: 0
   AppearanceRequirements: []
+  ScheduleEntries: []
   CanGainFriendship: 1
   CanRomance: 0
   CanMarry: 0
   MaxFriendshipLevel: 4
   MaxRomanceLevel: 0
-  ScheduleEntries: []
   CanReceiveGifts: 1
   ItemGiftPreferences: []
   CategoryGiftPreferences:
